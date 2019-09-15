@@ -1,0 +1,38 @@
+button#buttonImg {
+    background-color: white
+}
+
+button#buttonImg:hover {
+    border-color: greenyellow
+}
+
+#imgNav {
+    width:1em;
+    height:1em   
+}
+
+#navbar {
+    width:100%;
+}
+
+#imgButton {
+    width:20px;
+    height:20px;
+    object-fit:cover
+}
+
+#buttonFBGoogle {
+    background-color: #f2f2f2
+}
+
+#verCod {
+    width: 40px;
+    height: 60px;
+    font-size: 25px
+}
+
+@media (max-width:1000px) {
+    #curtain {
+        width:1000px;
+    }
+}

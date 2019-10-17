@@ -14,8 +14,7 @@ import Modalhome from "./Modalhome";
 class Home extends Component {
 
     state = {
-        bestSellingItem : [],
-        emailverified : ""
+        bestSellingItem : []
     }
 
     componentDidMount () {
@@ -26,18 +25,6 @@ class Home extends Component {
         ).then(res=>{
             this.setState({bestSellingItem:res.data})
         }).catch();
-
-        if (this.props.loginRedux.length>0) {
-            axios.get("http://localhost:5555/auth/getlogin", {
-                params : {
-                    username : this.props.loginRedux[0].username,
-                    email : this.props.loginRedux[0].username,
-                    cellphone : this.props.loginRedux[0].username
-                }
-            }).then(res=>{
-                this.setState({emailverified:res.data[0].emailverified})
-            }).catch()
-        }
     }
 
     renderBestSellingItem = () => {
@@ -82,7 +69,7 @@ class Home extends Component {
                 {
                     this.props.loginRedux.length>0
                     ?
-                        this.state.emailverified===0
+                        this.props.loginRedux[0].emailverified===0
                         ?
                         this.renderModal()
                         :

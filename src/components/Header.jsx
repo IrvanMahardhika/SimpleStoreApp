@@ -11,7 +11,8 @@ import {
     DropdownItem, UncontrolledPopover, PopoverHeader, PopoverBody,
     InputGroup, InputGroupAddon, Input, Button, FormGroup, Label, ListGroup, ListGroupItem, Badge } from 'reactstrap';
 import {connect} from "react-redux";
-import {login,logout} from "../action/index"
+import {login,logout} from "../action/index";
+
 
 class Header extends Component {
     
@@ -19,7 +20,9 @@ class Header extends Component {
         keyword : "",
         password : "",
         rememberMe : false,
-        username : ""
+        username : "",
+        renderpic : "images/userpics/nopic.png",
+        nextproductId : ""
     }
 
     componentDidMount () {
@@ -44,7 +47,7 @@ class Header extends Component {
             alert("Please fill in the empty field")
         } else {
             this.props.login(keyword, password, rememberMe)
-        }
+        } 
     }
 
     logoutClick = ()=>{
@@ -58,6 +61,52 @@ class Header extends Component {
         this.props.logout()
     }
 
+    renderStore = ()=>{
+        switch (true) {
+            case this.props.loginRedux.length>0 && this.props.loginRedux[0].storename!==null:
+                return (
+                    <NavItem>
+                        <UncontrolledDropdown  nav>
+                            <DropdownToggle id="Store" nav caret>
+                                {this.props.loginRedux[0].storename}
+                            </DropdownToggle>
+                        </UncontrolledDropdown>
+                        <UncontrolledPopover disabled={this.props.loginRedux[0].storeapproval===0} placement="bottom" trigger="legacy" target="Store">
+                            <PopoverHeader>
+                                <Button className="">
+                                    User Order <Badge style={{backgroundColor:"#ffc61a"}}>0</Badge>
+                                </Button>
+                            </PopoverHeader>
+                            <PopoverBody>
+                                <ListGroup flush>
+                                    <ListGroupItem tag="button" action>Check Store</ListGroupItem>
+                                    <ListGroupItem tag="button" action>Statistic</ListGroupItem>
+                                </ListGroup>
+                                <div className="row mt-2">
+                                    <div className="col-8 pr-0">
+                                        <a href="#">List Product</a>
+                                    </div>
+                                    <div className="col-4 pl-0">
+                                        <Button size="sm" href="/Addproduct" >add</Button>
+                                    </div>
+                                </div>
+                            </PopoverBody>
+                        </UncontrolledPopover>
+                    </NavItem>
+                )
+            case this.props.loginRedux.length>0 && this.props.loginRedux[0].storename===null:
+                return (
+                    <NavItem style={{width:"250px"}} className="text-center mr-2">
+                        <NavLink href="/Startselling"className="px-0">
+                            <span className="small">Start Selling</span>
+                        </NavLink>
+                    </NavItem>
+                )
+        }
+        
+
+    }
+
     render () {
         switch (true) {
             case this.props.check === true:
@@ -65,17 +114,17 @@ class Header extends Component {
                     <Navbar style={{backgroundColor:"#ffc61a"}} light expand id="curtain">
                             <Nav style={{width:"100%",height:"50px"}} className="justify-content-center" navbar>
                                 <NavLink href="/">
-                                    <img src={require("./Logo.png")} style={{width:"150px"}}/>
+                                    <img src={require("./Logo.png")} style={{width:"150px"}} alt="No pic" />
                                 </NavLink>
                             </Nav>
                     </Navbar>
                 )
-            case this.props.loginRedux.length>0 && this.props.loginRedux[0].storename===null:
+            case this.props.loginRedux.length>0:
                 return (
                     <Navbar style={{backgroundColor:"#ffc61a"}} light expand id="curtain">
                         <Nav style={{width:"100%", height:"50px"}} navbar>
                             <NavbarBrand href="/">
-                                    <img src={require("./Logo.png")} style={{width:"150px"}}/>
+                                    <img src={require("./Logo.png")} style={{width:"150px"}} alt="No pic" />
                             </NavbarBrand>
                             <UncontrolledDropdown nav>
                                 <DropdownToggle nav caret>
@@ -85,8 +134,8 @@ class Header extends Component {
                                     <DropdownItem>Fashion</DropdownItem>
                                     <DropdownItem>Furniture</DropdownItem>
                                     <DropdownItem>Electronic</DropdownItem>
-                                    <DropdownItem>Cell Phone</DropdownItem>
-                                    <DropdownItem>Laptop</DropdownItem>
+                                    <DropdownItem>Cellphone</DropdownItem>
+                                    <DropdownItem>Notebook</DropdownItem>
                                     <DropdownItem>Sport</DropdownItem>
                                 </DropdownMenu>
                             </UncontrolledDropdown>
@@ -94,20 +143,16 @@ class Header extends Component {
                                 <Input placeholder="search product" className="border-dark" style={{height:"40px"}}/>
                                 <InputGroupAddon addonType="append" style={{height:"40px"}}>
                                     <Button id="buttonImg" className="">
-                                        <img src={require('./magnifier.png')} id="imgNav"/>
+                                        <img src={require('./magnifier.png')} id="imgNav" alt="No pic" />
                                     </Button>
                                 </InputGroupAddon>
                             </InputGroup>
-                            <NavItem style={{width:"250px"}} className="text-center mr-2">
-                                <NavLink href="/Startselling"className="px-0">
-                                    <span className="small">Start Selling</span>
-                                </NavLink>
-                            </NavItem>
                             <NavItem className="mx-1">
                                 <Button id="buttonImg">
-                                    <img src={require('./cart.png')} id="imgNav"/>
+                                    <img src={require('./cart.png')} id="imgNav" alt="No pic" />
                                 </Button>
                             </NavItem>
+                            {this.renderStore()}
                             <UncontrolledDropdown  nav>
                                 <DropdownToggle id="User" nav caret>
                                     {this.props.loginRedux[0].username}
@@ -116,8 +161,14 @@ class Header extends Component {
                             <UncontrolledPopover placement="bottom" className="mx-auto" trigger="legacy" target="User">
                                 <PopoverHeader >
                                     <div className="row">
-                                        <div className="col-3">
-                                            <img className="rounded-circle" src={require("./irvan.jpg")} alt="no picture uploaded" style={{style:"3em",width:"3em",objectFit:"cover"}} />  
+                                        <div className="col-4">
+                                            {
+                                                this.props.loginRedux[0].userpic===null
+                                                ?
+                                                <img className="rounded-circle" src={"http://localhost:5555/"+this.state.renderpic} alt="No pic" style={{width:"50px",height:"50px",objectFit:"cover"}} />
+                                                :
+                                                <img className="rounded-circle" src={"http://localhost:5555/"+this.props.loginRedux[0].userpic} alt="No pic" style={{width:"50px",height:"50px",objectFit:"cover"}} />  
+                                            }
                                         </div>
                                         <div className="col-8 mt-2">
                                             <div className="row">
@@ -127,7 +178,7 @@ class Header extends Component {
                                             </div>
                                             <div className="row">
                                                 <div className="col">
-                                                    <a href="/"><small>Edit profile</small></a>
+                                                    <a href="/Editprofile"><small>Edit profile</small></a>
                                                 </div>
                                             </div>
                                         </div>
@@ -157,120 +208,12 @@ class Header extends Component {
                         </Nav>
                     </Navbar>
                 )
-            case this.props.loginRedux.length>0:
-                return (
-                    <Navbar style={{backgroundColor:"#ffc61a"}} light expand id="curtain">
-                        <Nav style={{width:"100%", height:"50px"}} navbar>
-                            <NavbarBrand href="/">
-                                    <img src={require("./Logo.png")} style={{width:"150px"}}/>
-                            </NavbarBrand>
-                            <UncontrolledDropdown nav>
-                                <DropdownToggle nav caret>
-                                    Category
-                                </DropdownToggle>
-                                <DropdownMenu>
-                                    <DropdownItem>Fashion</DropdownItem>
-                                    <DropdownItem>Furniture</DropdownItem>
-                                    <DropdownItem>Electronic</DropdownItem>
-                                    <DropdownItem>Cell Phone</DropdownItem>
-                                    <DropdownItem>Laptop</DropdownItem>
-                                    <DropdownItem>Sport</DropdownItem>
-                                </DropdownMenu>
-                            </UncontrolledDropdown>
-                            <InputGroup>
-                                <Input placeholder="search product" className="border-dark" style={{height:"40px"}}/>
-                                <InputGroupAddon addonType="append" style={{height:"40px"}}>
-                                    <Button id="buttonImg" className="">
-                                        <img src={require('./magnifier.png')} id="imgNav"/>
-                                    </Button>
-                                </InputGroupAddon>
-                            </InputGroup>
-                            <NavItem className="mx-1">
-                                <Button id="buttonImg">
-                                    <img src={require('./cart.png')} id="imgNav"/>
-                                </Button>
-                            </NavItem>
-                            <UncontrolledDropdown  nav>
-                                <DropdownToggle id="Store" nav caret>
-                                    {this.props.loginRedux[0].storename}
-                                </DropdownToggle>
-                            </UncontrolledDropdown>
-                            <UncontrolledPopover disabled={this.props.loginRedux[0].storeapproval===0} placement="bottom" trigger="legacy" target="Store">
-                                <PopoverHeader>
-                                    <Button className="">
-                                        User Order <Badge style={{backgroundColor:"#ffc61a"}}>0</Badge>
-                                    </Button>
-                                </PopoverHeader>
-                                <PopoverBody>
-                                    <ListGroup flush>
-                                        <ListGroupItem tag="button" action>Check Store</ListGroupItem>
-                                        <ListGroupItem tag="button" action>Statistic</ListGroupItem>
-                                    </ListGroup>
-                                    <div className="row mt-2">
-                                        <div className="col-8 pr-0">
-                                            <a href="#">List Product</a>
-                                        </div>
-                                        <div className="col-4 pl-0">
-                                            <Button size="sm">add</Button>
-                                        </div>
-                                    </div>
-                                </PopoverBody>
-                            </UncontrolledPopover>
-                            <UncontrolledDropdown  nav>
-                                <DropdownToggle id="User" nav caret>
-                                    {this.props.loginRedux[0].username}
-                                </DropdownToggle>
-                            </UncontrolledDropdown>
-                            <UncontrolledPopover placement="bottom" className="mx-auto" trigger="legacy" target="User">
-                                <PopoverHeader >
-                                    <div className="row">
-                                        <div className="col-3">
-                                            <img className="rounded-circle" src={require("./irvan.jpg")} alt="no picture uploaded" style={{style:"3em",width:"3em",objectFit:"cover"}} />  
-                                        </div>
-                                        <div className="col-8 mt-2">
-                                            <div className="row">
-                                                <div className="col" >
-                                                    <small>{this.props.loginRedux[0].fullname}</small>
-                                                </div>
-                                            </div>
-                                            <div className="row">
-                                                <div className="col">
-                                                    <a href="#"><small>Edit profile</small></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>    
-                                </PopoverHeader>
-                                <PopoverBody>
-                                    <div>
-                                        Balance :
-                                    </div>
-                                    <div>
-                                        Points :
-                                    </div>
-                                    <hr></hr>
-                                    <div className="row">
-                                        <div className="col-6 text-center border-right ">
-                                            <a href="#">History</a>
-                                        </div>
-                                        <div className="col-6 text-center">
-                                            <a href="#">Wishlist</a>
-                                        </div>
-                                    </div>
-                                    <Button className="btn-block mt-3" onClick={()=>{this.logoutClick()}} >
-                                        Logout
-                                    </Button>
-                                </PopoverBody>
-                            </UncontrolledPopover>
-                        </Nav>
-                    </Navbar>
-                )
             default:
                 return (
                     <Navbar style={{backgroundColor:"#ffc61a"}} light expand id="curtain">
                         <Nav style={{width:"100%", height:"50px"}} navbar>
                             <NavbarBrand href="/">
-                                    <img src={require("./Logo.png")} style={{width:"150px"}}/>
+                                    <img src={require("./Logo.png")} style={{width:"150px"}} alt="No pic" />
                             </NavbarBrand>
                             <UncontrolledDropdown nav>
                                 <DropdownToggle nav caret>
@@ -289,7 +232,7 @@ class Header extends Component {
                                 <Input placeholder="search product" className="border-dark" style={{height:"40px"}}/>
                                 <InputGroupAddon addonType="append" style={{height:"40px"}}>
                                     <Button id="buttonImg" className="">
-                                        <img src={require('./magnifier.png')} id="imgNav"/>
+                                        <img src={require('./magnifier.png')} id="imgNav" alt="No pic" />
                                     </Button>
                                 </InputGroupAddon>
                             </InputGroup>
@@ -316,7 +259,7 @@ class Header extends Component {
                             </NavItem>
                             <NavItem className="">
                                 <Button id="buttonImg">
-                                    <img src={require('./cart.png')} id="imgNav"/>
+                                    <img src={require('./cart.png')} id="imgNav" alt="No pic" />
                                 </Button>
                             </NavItem>
                             <UncontrolledDropdown  nav>
@@ -369,7 +312,7 @@ class Header extends Component {
                                     <Button className="btn-block btn-outline-secondary" id="buttonFBGoogle">
                                         <div className="row">
                                             <div className="col-2">
-                                                <img src={require('./fb.png')} id="imgButton"/>
+                                                <img src={require('./fb.png')} id="imgButton" alt="No pic" />
                                             </div>
                                             <div className="col-8">
                                                 Facebook
@@ -379,7 +322,7 @@ class Header extends Component {
                                     <Button className="btn-block btn-outline-secondary" id="buttonFBGoogle">
                                         <div className="row">
                                             <div className="col-2">
-                                                <img src={require('./Google.png')} id="imgButton"/>
+                                                <img src={require('./Google.png')} id="imgButton" alt="No pic" />
                                             </div>
                                             <div className="col-8">
                                                 Google

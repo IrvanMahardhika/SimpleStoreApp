@@ -129,7 +129,7 @@ class Register extends Component {
                                     <Button className="btn-block btn-outline-secondary" id="buttonFBGoogle">
                                         <div className="row">
                                             <div className="col-2">
-                                                <img src={require('./fb.png')} id="imgButton"/>
+                                                <img src={require('./fb.png')} id="imgButton" alt="No pic" />
                                             </div>
                                             <div className="col-8">
                                                 Facebook
@@ -139,7 +139,7 @@ class Register extends Component {
                                     <Button className="btn-block btn-outline-secondary" id="buttonFBGoogle">
                                         <div className="row">
                                         <div className="col-2">
-                                            <img src={require('./Google.png')} id="imgButton"/>
+                                            <img src={require('./Google.png')} id="imgButton" alt="No pic" />
                                             </div>
                                             <div className="col-8">
                                                 Google

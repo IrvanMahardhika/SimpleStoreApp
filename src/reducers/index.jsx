@@ -2,9 +2,9 @@ import {combineReducers} from "redux";
 
 const init = {
     check : false,
-    user : [],
     register : "",
-    location : []
+    location : [],
+    user : []
 }
 
 const checkReducer = (state=init,action)=>{

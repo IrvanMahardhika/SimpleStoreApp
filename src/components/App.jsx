@@ -1,7 +1,7 @@
 import React,{Component} from "react";
 import {Route, BrowserRouter} from "react-router-dom";
 import {connect} from "react-redux";
-import {keeplogin} from "../action/index"
+import {keepLogin,getData} from "../action/index"
 
 import Home from "./Home"
 import Register from "./Register"
@@ -10,7 +10,9 @@ import Header from "./Header"
 import Transtat from "./Transtat"
 import Startsell from "./Startsell"
 import Forgotpasswordstart from "./Forgotpasswordstart"
-import Forgotpasswordend from './Forgotpasswordend'
+import Forgotpasswordend from "./Forgotpasswordend"
+import Editprofile from "./Editprofile"
+import Addproduct from "./Addproduct"
 
 
 class App extends Component {
@@ -22,7 +24,8 @@ class App extends Component {
     componentDidMount () {
         let storage = JSON.parse(localStorage.getItem("userData"))
         if (storage) {
-            this.props.keeplogin(storage)
+            this.props.keepLogin(storage)
+            this.props.getData()
         }
         this.setState({check:true})
     }
@@ -39,6 +42,8 @@ class App extends Component {
                     <Route path="/Startselling"  component={Startsell}/>
                     <Route path="/Forgotpasswordstart" component={Forgotpasswordstart} />
                     <Route path="/Forgotpasswordend/:username" component={Forgotpasswordend} />
+                    <Route path="/Editprofile" component={Editprofile} />
+                    <Route path="/Addproduct" component={Addproduct} />
                 </BrowserRouter>
             )
         } else {
@@ -47,4 +52,4 @@ class App extends Component {
     }
 }
 
-export default connect(null,{keeplogin})(App)
+export default connect(null,{keepLogin,getData})(App)

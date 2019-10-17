@@ -18,57 +18,65 @@ export const login = (keyword, password, rememberMe)=>{
             params : {
                 username : keyword,
                 email : keyword,
-                cellphone : keyword
+                cellphone : keyword,
+                password : password
             }
         })
-        .then(res=>{
-            let filterPassword = res.data.filter(val=>val.password===password)   
-            if (filterPassword.length===0) {
+        .then(res=>{   
+            if (res.data.length===0) {
                 alert("User not found")
-            } else if (filterPassword.length>0 && rememberMe===true) {
+            } else if (res.data.length>0 && rememberMe===true) {
                 alert("Login success.");
                 localStorage.setItem(
                     "userData",
-                    JSON.stringify(filterPassword)
+                    JSON.stringify(res.data)
                 );
                 localStorage.setItem(
                     "rememberMe",
-                    JSON.stringify(filterPassword[0].username)
+                    JSON.stringify(res.data[0].username)
                 );
                 dispatch(
                     {
                         type : "LOGIN_SUCCESS",
-                        payload : filterPassword
+                        payload : res.data
                     }
                 )
-            } else if (filterPassword.length>0 && rememberMe===false) {
+            } else if (res.data.length>0 && rememberMe===false) {
                 alert("Login Success.");
                 localStorage.setItem(
                     "userData",
-                    JSON.stringify(filterPassword)
+                    JSON.stringify(res.data)
                 );
                 localStorage.removeItem("rememberMe");
                 dispatch(
                     {
                         type : "LOGIN_SUCCESS",
-                        payload : filterPassword
+                        payload : res.data
                     }
                 )
             }
+            axios.post("http://localhost:5555/auth/gettoken",{
+                username : res.data[0].username
+            })
+            .then(res=>{
+                localStorage.setItem("token",res.data.token);
+            }).catch()
         })
         .catch()
     }
 }
 
-export const keeplogin = (storage)=>{
+export const keepLogin = (val)=>{
     return {
         type : "LOGIN_SUCCESS",
-        payload : storage
+        payload : val
     }
 }
 
 export const logout = ()=>{
     localStorage.removeItem("userData");
+    localStorage.removeItem("token");
+    localStorage.removeItem("setproductId");
     alert("Logout Success.");
     return {
         type : "LOGOUT_SUCCESS"
@@ -189,6 +197,7 @@ export const changePassword = (val)=>{
 
 export const sendVerifyEmail = (val)=>{
     return (dispatch) => {
+        alert("Verification link has been sent to your e-mail.");
         axios.get("http://localhost:5555/mail/sendverifyemail", {
             params : {
                 email : val.email,
@@ -196,9 +205,35 @@ export const sendVerifyEmail = (val)=>{
                 fullname : val.fullname,
                 username : val.username
             }
-        }).then(res=>{
-            alert("Verification link has been sent to your e-mail.");
-        }).catch();
+        }).then().catch();
     } 
+}
+
+export const getData = ()=>{
+    let storage = JSON.parse(localStorage.getItem("userData"))
+    let token = localStorage.getItem("token")
+    return (dispatch) => {
+        axios.get("http://localhost:5555/auth/getdata", {
+            params : {
+                userId : storage[0].userId
+            },
+            headers : {
+                authorization : token
+            }
+        })
+        .then(res=>{
+            localStorage.setItem(
+                "userData",
+                JSON.stringify(res.data)
+            );
+            dispatch(
+                {
+                    type : "LOGIN_SUCCESS",
+                    payload : res.data
+                }
+            )
+        })
+        .catch()
+    }
 }
 

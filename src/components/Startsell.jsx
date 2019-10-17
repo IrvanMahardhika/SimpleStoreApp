@@ -12,34 +12,33 @@ import {showLocation,addStore,finish} from "../action/store"
 class Startsell extends Component {
 
     constructor(props) {
-    super(props);
+        super(props);
 
-    this.toggle = this.toggle.bind(this);
-    this.state = {
-        activeTab: '1',
-        disabledTab1: false,
-        disabledTab2: true,
-        disabledTab3: true,
-        storename: "",
-        postalCode: "a",
-        address:"",
-        acknowledge : "",
-        randomCode: "",
-        input1: "",
-        input2: "",
-        input3: "",
-        input4: "",
-        input5: "",
-        input6: "",
-        emailverified: "",
-        verCel: false,
-        cellphoneverified: ""
-    };
+        this.toggle = this.toggle.bind(this);
+        this.state = {
+            activeTab: '1',
+            disabledTab1: false,
+            disabledTab2: true,
+            disabledTab3: true,
+            storename: "",
+            postalCode: "a",
+            address:"",
+            acknowledge : "",
+            randomCode: "",
+            input1: "",
+            input2: "",
+            input3: "",
+            input4: "",
+            input5: "",
+            input6: "",
+            emailverified: "",
+            verCel: false,
+            cellphoneverified: ""
+        };
     }
 
     componentDidMount () {
         this.props.headerChange();
-        
         if (this.props.loginRedux.length>0) {
             axios.get("http://localhost:5555/auth/getlogin", {
                 params : {
@@ -178,8 +177,10 @@ class Startsell extends Component {
         switch (true) {
             case this.state.emailverified===0:
                 alert("Your e-mail has not been verified.\nPlease click button above.")
+                break;
             case this.state.cellphoneverified==="":
                 alert("Your cellphone has not been verified.\nPlease click button above.")
+                break;
             default:
                 break;
         }

@@ -58,11 +58,10 @@ class Home extends Component {
 
     render () {
         return (
-            <div className="mt-3" style={{margin:"50px"}}>
+            <div className="mt-3" style={{margin:"100px"}}>
                 {this.renderCarousel()}
                 <br></br>
                 <p className="h5" style={{color:"#737373"}}>Best Selling Item</p>
-                
                 <div style={{height:"300px",overflowX:"scroll",overflowY:"hidden",whiteSpace:"nowrap"}}>
                     {this.renderBestSellingItem()}
                 </div>

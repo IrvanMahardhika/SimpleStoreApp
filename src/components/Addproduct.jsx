@@ -292,7 +292,7 @@ class Addproduct extends Component {
                 </ModalBody>
                 <ModalFooter>
                     <Button color="secondary" href="/Addproduct" >Add another product</Button>
-                    <Button color="secondary" href="#" >List Product</Button>
+                    <Button color="secondary" href="/Listproduct" >List Product</Button>
                     <Button color="secondary" href="/" >Home</Button>
                 </ModalFooter>
             </Modal>

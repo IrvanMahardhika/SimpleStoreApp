@@ -44,28 +44,3 @@ export const addStore = (val,district,cityregency,province,userid)=>{
         ).then().catch()
     }
 }
-
-export const finish = (keyword)=>{
-    return (dispatch) => {
-        axios.get("http://localhost:5555/auth/getlogin", {
-            params : {
-                username : keyword,
-                email : keyword,
-                cellphone : keyword
-            }
-        })
-        .then(res=>{
-            localStorage.setItem(
-                "userData",
-                JSON.stringify(res.data)
-            );
-            dispatch(
-                {
-                    type : "LOGIN_SUCCESS",
-                    payload : res.data
-                }
-            )
-        })
-        .catch()
-    }
-}

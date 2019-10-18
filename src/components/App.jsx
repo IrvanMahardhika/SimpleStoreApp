@@ -42,7 +42,7 @@ class App extends Component {
                     <Route path="/Transactionstatus" component={Transtat}/>
                     <Route path="/Startselling"  component={Startsell}/>
                     <Route path="/Forgotpasswordstart" component={Forgotpasswordstart} />
-                    <Route path="/Forgotpasswordend/:username" component={Forgotpasswordend} />
+                    <Route path="/Forgotpasswordend/:userId" component={Forgotpasswordend} />
                     <Route path="/Editprofile" component={Editprofile} />
                     <Route path="/Addproduct" component={Addproduct} />
                     <Route path="/Listproduct" component={Listproduct} />

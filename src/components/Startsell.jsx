@@ -5,8 +5,8 @@ import classnames from 'classnames';
 import {Redirect} from "react-router-dom";
 import axios from "axios";
 
-import {headerChange,sendVerifyEmail} from "../action/index";
-import {showLocation,addStore,finish} from "../action/store"
+import {headerChange,sendVerifyEmail,getData} from "../action/index";
+import {showLocation,addStore} from "../action/store"
 
 
 class Startsell extends Component {
@@ -39,14 +39,18 @@ class Startsell extends Component {
 
     componentDidMount () {
         this.props.headerChange();
-        if (this.props.loginRedux.length>0) {
-            axios.get("http://localhost:5555/auth/getlogin", {
+        let storage = JSON.parse(localStorage.getItem("userData"))
+        let token = localStorage.getItem("token")
+        if (storage) {
+            axios.get("http://localhost:5555/auth/getdata", {
                 params : {
-                    username : this.props.loginRedux[0].username,
-                    email : this.props.loginRedux[0].username,
-                    cellphone : this.props.loginRedux[0].username
+                    userId : storage[0].userId
+                },
+                headers : {
+                    authorization : token
                 }
-            }).then(res=>{
+            })
+            .then(res=>{
                 this.setState({emailverified:res.data[0].emailverified})
             }).catch()
         }
@@ -164,15 +168,20 @@ class Startsell extends Component {
     }
 
     continueClick2 = ()=>{
-        axios.get("http://localhost:5555/auth/getlogin", {
+        let storage = JSON.parse(localStorage.getItem("userData"))
+        let token = localStorage.getItem("token")
+        axios.get("http://localhost:5555/auth/getdata", {
             params : {
-                username : this.props.loginRedux[0].username,
-                email : this.props.loginRedux[0].username,
-                cellphone : this.props.loginRedux[0].username
+                userId : storage[0].userId
+            },
+            headers : {
+                authorization : token
             }
-        }).then(res=>{
+        })
+        .then(res=>{
             this.setState({emailverified:res.data[0].emailverified})
-        }).catch()
+        })
+        .catch()
 
         switch (true) {
             case this.state.emailverified===0:
@@ -193,8 +202,7 @@ class Startsell extends Component {
     }
 
     finishClick = ()=>{
-        localStorage.removeItem("userData");
-        this.props.finish(this.props.loginRedux[0].username)     
+            this.props.getData()
     }
 
     render () {
@@ -248,7 +256,7 @@ class Startsell extends Component {
                                 <FormGroup check>
                                     <Label check>
                                         <Input type="checkbox" onClick={()=>{this.handleClickAcknowledge()}} />
-                                        I acknowledge that I have read and agree to the <a href="#">Terms and Privacy policy</a> of SimpleStore
+                                        I acknowledge that I have read and agree to the <a href="/">Terms and Privacy policy</a> of SimpleStore
                                     </Label>
                                 </FormGroup>
                                 <Button className="btn-block my-3" onClick={()=>{this.continueClick1()}}>
@@ -331,7 +339,7 @@ class Startsell extends Component {
                                         this.state.verCel===true && this.state.cellphoneverified===""
                                         ?
                                         <CardText style={{textAlign:"center"}} className="my-3">
-                                            Re-send <a href="#" onClick={() => {this.verCelShow()}} >verification code</a>
+                                            Re-send <a id="pointlink" onClick={() => {this.verCelShow()}} >verification code</a>
                                         </CardText>
                                         :
                                         null
@@ -384,4 +392,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps,{headerChange,showLocation,sendVerifyEmail,addStore,finish})(Startsell)
+export default connect(mapStateToProps,{headerChange,showLocation,sendVerifyEmail,addStore,getData})(Startsell)

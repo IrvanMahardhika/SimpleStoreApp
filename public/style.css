@@ -35,14 +35,14 @@ button#buttonImg:hover {
     cursor: pointer;
 }
 
-/* #pointlink {
+#pointlink {
     cursor: pointer;
     color: royalblue;
 }
 
 #pointlink:hover {
     text-decoration: underline;
-} */
+}
 
 @media (max-width:1100px) {
     #curtain {

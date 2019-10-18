@@ -85,7 +85,7 @@ export const logout = ()=>{
 
 export const addUser = (val)=>{
     return (dispatch) => {
-        axios.get("http://localhost:5555/auth/getlogin", {
+        axios.get("http://localhost:5555/auth/checkuser", {
             params : {
                 username : val.username,
                 email : val.email,
@@ -143,11 +143,9 @@ export const addUser = (val)=>{
 
 export const sendLinkChangePasswordEmail = (val)=>{
     return (dispatch) => {
-        axios.get("http://localhost:5555/auth/getlogin", {
+        axios.get("http://localhost:5555/auth/getuserbyemail", {
             params : {
-                username : val,
-                email : val,
-                cellphone : val
+                email : val
             }
         })
         .then(res=>{
@@ -160,7 +158,7 @@ export const sendLinkChangePasswordEmail = (val)=>{
                         email : res.data[0].email,
                         gender : res.data[0].gender,
                         fullname : res.data[0].fullname,
-                        username : res.data[0].username
+                        userId : res.data[0].userId
                     }
                 }).then().catch();
                 dispatch(
@@ -179,19 +177,27 @@ export const changePassword = (val)=>{
     return (dispatch) => {
         axios.put("http://localhost:5555/auth/changePassword",
             {
+                userId : val.userId,
                 username : val.username,
                 password : val.retype_password
             }
-            )
-            .then(res=>{
+        )
+        .then(res=>{
+            console.log(res.data.changedRows);
+            
+            if (res.data.changedRows===0) {
+                alert("Wrong username")
+            } else {
                 alert("Your password has been changed.\nPlease try to login using your new password.");
-            })
-            .catch()
-            dispatch(
-                {
-                    type : "REGISTER_SUCCESS"
-                }
-            )
+                dispatch(
+                    {
+                        type : "REGISTER_SUCCESS"
+                    }
+                )
+            }
+            
+        })
+        .catch()    
     }
 }
 

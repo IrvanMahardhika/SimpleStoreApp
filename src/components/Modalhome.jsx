@@ -39,7 +39,7 @@ class Modalhome extends Component {
                     </ModalBody>
                     <ModalFooter>
                         <span>
-                            <a onClick={this.toggle} href="#">
+                            <a onClick={this.toggle} id="pointlink" >
                                 I already received the link
                             </a>
                         </span>&nbsp;&nbsp;&nbsp;

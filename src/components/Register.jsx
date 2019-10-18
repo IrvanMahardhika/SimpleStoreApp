@@ -119,7 +119,7 @@ class Register extends Component {
                                     <FormGroup check>
                                         <Label check>
                                             <Input type="checkbox" onClick={()=>{this.handleClickAcknowledge()}} />
-                                            I acknowledge that I have read and agree to the <a href="#">Terms and Privacy policy</a> of SimpleStore
+                                            I acknowledge that I have read and agree to the <a href="/">Terms and Privacy policy</a> of SimpleStore
                                         </Label>
                                     </FormGroup>
                                     <Button className="btn-block my-3" onClick={()=>{this.registerClick()}} >

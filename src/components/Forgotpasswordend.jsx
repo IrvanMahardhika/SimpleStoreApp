@@ -7,6 +7,7 @@ import {Redirect} from "react-router-dom"
 class Forgotpasswordend extends Component {
 
     state = {
+        userId : "",
         username : "",
         password : "a",
         retype_password : "b"
@@ -14,7 +15,9 @@ class Forgotpasswordend extends Component {
 
     componentDidMount () {
         this.props.headerChange()
-        this.setState({username:this.props.match.params.username})
+        this.setState({userId:this.props.match.params.userId})
+        
+        
     }
 
     handleBlurPassword = (val)=>{
@@ -49,8 +52,9 @@ class Forgotpasswordend extends Component {
                                 </ToastHeader>
                                 <ToastBody>
                                     <p className="mb-4 text-justify">
-                                        Insert your <b>new password</b>.
+                                        Insert your username and <b>new password</b>.
                                     </p>
+                                    <Input autoFocus placeholder="Username" type="text" className="mt-3" onChange={e=>this.setState({username:e.target.value})} />
                                     <FormGroup>
                                         <Input invalid={!this.state.password} placeholder="New password" type="password" className="mt-3" onChange={e=>this.handleBlurPassword(e.target.value)} />
                                         <FormFeedback onInvalid>Password must contain at least 8 character</FormFeedback>

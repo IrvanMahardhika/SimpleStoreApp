@@ -157,9 +157,14 @@ class Editprofile extends Component {
     }
 
     renderPic = ()=>{
-        axios.get("http://localhost:5555/auth/getlogin", {
+        let storage = JSON.parse(localStorage.getItem("userData"))
+        let token = localStorage.getItem("token")
+        axios.get("http://localhost:5555/auth/getdata", {
             params : {
-                username : this.props.loginRedux[0].username
+                userId : storage[0].userId
+            },
+            headers : {
+                authorization : token
             }
         })
         .then(res=>{

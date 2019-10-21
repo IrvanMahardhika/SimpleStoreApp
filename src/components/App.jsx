@@ -14,6 +14,7 @@ import Forgotpasswordend from "./Forgotpasswordend"
 import Editprofile from "./Editprofile"
 import Addproduct from "./Addproduct"
 import Listproduct from "./Listproduct"
+import Markdown from "./Markdown"
 
 
 class App extends Component {
@@ -46,6 +47,7 @@ class App extends Component {
                     <Route path="/Editprofile" component={Editprofile} />
                     <Route path="/Addproduct" component={Addproduct} />
                     <Route path="/Listproduct" component={Listproduct} />
+                    <Route path="/Markdown" component={Markdown} />
                 </BrowserRouter>
             )
         } else {

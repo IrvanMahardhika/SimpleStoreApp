@@ -13,6 +13,10 @@ class Listproduct extends Component {
             modal : false,
             unapprovedProductList : [],
             approvedProductList : [],
+            productBrand : "",
+            productName : "",
+            productColor : "",
+            ProductWeight : "",
             productDescription : ""
         };
         this.toggle = this.toggle.bind(this);
@@ -73,7 +77,7 @@ class Listproduct extends Component {
                     <td className="p-2 text-center align-text-top" >{val.brand}</td>
                     <td className="p-2 text-center align-text-top" >{val.name}</td>
                     <td className="p-2 text-center " >
-                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productDescription:val.description})}} >Show</Button>
+                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productBrand:val.brand,productName:val.name,productColor:val.color,ProductWeight:val.weight,productDescription:val.description})}} >Show</Button>
                     </td>
                     <td className="p-2 text-center align-text-top" >{val.inventory}</td>
                     <td className="p-2 text-center align-text-top" >{val.measurement}</td>
@@ -105,13 +109,12 @@ class Listproduct extends Component {
                     <td className="p-2 text-center align-text-top" >{val.brand}</td>
                     <td className="p-2 text-center align-text-top" >{val.name}</td>
                     <td className="p-2 text-center " >
-                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productDescription:val.description})}} >Show</Button>
+                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productBrand:val.brand,productName:val.name,productColor:val.color,ProductWeight:val.weight,productDescription:val.description})}} >Show</Button>
                     </td>
                     <td className="p-2 text-center align-text-top" >{val.inventory}</td>
                     <td className="p-2 text-center align-text-top" >{val.measurement}</td>
                     <td className="p-2 text-center align-text-top" >
                         <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
-                        <Button size="sm" >Markdown</Button>
                     </td>
                     <td className="p-2 text-center " >
                         <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
@@ -134,14 +137,22 @@ class Listproduct extends Component {
     renderModal = ()=>{
         return (
             <Modal isOpen={this.state.modal}>
-                <ModalHeader style={{backgroundColor:"#ffc61a"}}>Product Description</ModalHeader>
+                <ModalHeader style={{backgroundColor:"#ffc61a"}}>Description of {this.state.productBrand} {this.state.productName}</ModalHeader>
                 <ModalBody>
                     <p className="text-justify">
+                        Color : {this.state.productColor}
+                        <br></br>
+                        <br></br>
+                        Weight : {this.state.ProductWeight} kg/each
+                        <br></br>
+                        <br></br>
+                        Description :
+                        <br></br>
                         {this.state.productDescription}
                     </p>
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="secondary" onClick={()=>{this.toggle()}} >Close</Button>
+                    <Button size="sm" color="secondary" onClick={()=>{this.toggle()}} >Close</Button>
                 </ModalFooter>
             </Modal>
         )
@@ -174,7 +185,7 @@ class Listproduct extends Component {
                                 <td className="p-2 text-center " >Brand</td>
                                 <td className="p-2 text-center " >Name</td>
                                 <td className="p-2 text-center " >Desc</td>
-                                <td className="p-2 text-center " >Inventory</td>
+                                <td className="p-2 text-center " >Stock</td>
                                 <td className="p-2 text-center " >EA</td>
                                 <td className="p-2 text-center " >Price (IDR)</td>
                                 <td className="p-2 text-center " >Pic 1</td>
@@ -199,7 +210,7 @@ class Listproduct extends Component {
                                 <td className="p-2 text-center " >Brand</td>
                                 <td className="p-2 text-center " >Name</td>
                                 <td className="p-2 text-center " >Desc</td>
-                                <td className="p-2 text-center " >Inventory</td>
+                                <td className="p-2 text-center " >Stock</td>
                                 <td className="p-2 text-center " >EA</td>
                                 <td className="p-2 text-center " >Price (IDR)</td>
                                 <td className="p-2 text-center " >Pic 1</td>
@@ -211,7 +222,7 @@ class Listproduct extends Component {
                                 {this.renderApprovedProductList()}
                                 <tr>
                                     <td className="p-2 text-right " colSpan="12">
-                                        <Button>Markdown ALL</Button>
+                                        <Button href="/Markdown">Set Price Markdown</Button>
                                     </td>
                                 </tr>
                             </tbody>

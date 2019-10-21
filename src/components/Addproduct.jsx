@@ -27,7 +27,10 @@ class Addproduct extends Component {
             measurement : "meter",
             name : "",
             price : "",
-            description : ""
+            description : "",
+            color : "",
+            weight : "",
+            dimension : ""
         };
         this.toggle = this.toggle.bind(this);
     }
@@ -252,7 +255,7 @@ class Addproduct extends Component {
             case this.state.renderpic3 === "images/productpics/nopic.png":
                 alert("Please upload 3 product picture")
                 break;
-            case !this.state.brand || !this.state.inventory || !this.state.name || !this.state.description || !this.state.price:
+            case !this.state.brand || !this.state.inventory || !this.state.name || !this.state.description || !this.state.price || !this.state.weight || !this.state.color :
                 alert("Please fill in all empty fields")
             default:
                 let setProductId = localStorage.getItem("setproductId")
@@ -262,6 +265,9 @@ class Addproduct extends Component {
                 inventory : this.state.inventory,
                 measurement : this.state.measurement,
                 name : this.state.name,
+                color : this.state.color,
+                weight : this.state.weight,
+                dimension : this.state.dimension,
                 description : this.state.description,
                 price : this.state.price,
                 productId : setProductId
@@ -309,7 +315,7 @@ class Addproduct extends Component {
                         <Row className="mb-3">
                             <Card style={{width:"300px"}} className="mr-3">
                                 <CardHeader>Product Picture 1</CardHeader>
-                                <CardImg className="mx-auto my-3" src={"http://localhost:5555/"+this.state.renderpic1} style={{height:"250px",width:"250px",objectFit:"cover"}} alt="Card image cap" />
+                                <CardImg className="mx-auto my-3 border" src={"http://localhost:5555/"+this.state.renderpic1} style={{height:"250px",width:"250px",objectFit:"cover"}} alt="Card image cap" />
                                 {
                                     this.state.editPic1===true
                                     ?
@@ -339,7 +345,7 @@ class Addproduct extends Component {
         
                             <Card style={{width:"300px"}} className="mr-3">
                                 <CardHeader>Product Picture 2</CardHeader>
-                                <CardImg className="mx-auto my-3" src={"http://localhost:5555/"+this.state.renderpic2} style={{height:"250px",width:"250px",objectFit:"cover"}} alt="Card image cap" />
+                                <CardImg className="mx-auto my-3 border" src={"http://localhost:5555/"+this.state.renderpic2} style={{height:"250px",width:"250px",objectFit:"cover"}} alt="Card image cap" />
                                 {
                                     this.state.editPic2===true
                                     ?
@@ -369,7 +375,7 @@ class Addproduct extends Component {
         
                             <Card style={{width:"300px"}} className="mr-3">
                                 <CardHeader>Product Picture 3</CardHeader>
-                                <CardImg className="mx-auto my-3" src={"http://localhost:5555/"+this.state.renderpic3} style={{height:"250px",width:"250px",objectFit:"cover"}} alt="Card image cap" />
+                                <CardImg className="mx-auto my-3 border" src={"http://localhost:5555/"+this.state.renderpic3} style={{height:"250px",width:"250px",objectFit:"cover"}} alt="Card image cap" />
                                 {
                                     this.state.editPic3===true
                                     ?
@@ -410,9 +416,9 @@ class Addproduct extends Component {
                                         <option value="Sport" >Sport</option>
                                     </select>
                                     <label>Brand :&nbsp;</label>
-                                    <input className="mr-5" style={{width:"290px"}} onChange={e=>this.setState({brand:e.target.value})} />
+                                    <input type="text" className="mr-5" style={{width:"290px"}} onChange={e=>this.setState({brand:e.target.value})} />
                                     <label>Inventory :&nbsp;&nbsp;</label>
-                                    <input style={{width:"50px"}} onChange={e=>this.setState({inventory:e.target.value})} />
+                                    <input type="number" style={{width:"50px"}} onChange={e=>this.setState({inventory:e.target.value})} />
                                     <select style={{height:"40px"}} onClick={e=>this.setState({measurement:e.target.value})} >
                                         <option value="meter" >Meter (mtr)</option>
                                         <option value="centimeter" >Centimeter (cm)</option>
@@ -425,13 +431,21 @@ class Addproduct extends Component {
                                 </p>
                                 <p>
                                     <label>Name :&nbsp;</label>
-                                    <input className="mr-5" style={{width:"510px"}} onChange={e=>this.setState({name:e.target.value})} />
+                                    <input type="text" className="mr-5" style={{width:"510px"}} onChange={e=>this.setState({name:e.target.value})} />
                                     <label>Price (IDR) :&nbsp;</label>
                                     <input style={{width:"210px"}} onChange={e=>this.setState({price:e.target.value})} />
                                 </p>
                                 <p>
+                                    <label>Color :&nbsp;</label>
+                                    <input type="text" className="mr-3" style={{width:"200px"}} onChange={e=>this.setState({color:e.target.value})} />
+                                    <label>Weight (kg/each) :&nbsp;</label>
+                                    <input type="number" className="mr-3" style={{width:"50px"}} onChange={e=>this.setState({weight:e.target.value})} />
+                                    <label>Dimension (cm) :&nbsp;</label>
+                                    <input placeholder="exp : length x width x height, or diameter" className="mr-3" style={{width:"320px"}} onChange={e=>this.setState({dimension:e.target.value})} />
+                                </p>
+                                <p>
                                     <Label for="exampleText">Description :</Label>
-                                    <Input style={{width:"920px"}} type="textarea" name="text" id="exampleText" onChange={e=>this.setState({description:e.target.value})} />
+                                    <Input style={{width:"920px"}} type="textarea" name="text" id="exampleText" placeholder="exp : fabrics, material, feature, etc" onChange={e=>this.setState({description:e.target.value})} />
                                 </p>
                             </FormGroup>
                             <Button onClick={()=>{this.addProduct()}} >Add Product</Button>

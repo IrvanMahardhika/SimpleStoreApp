@@ -21,7 +21,7 @@ class Addproduct extends Component {
             productpic1 : "",
             productpic2 : "",
             productpic3 : "",
-            category : "Fashion",
+            category : "Furniture",
             brand : "",
             inventory : "",
             measurement : "meter",
@@ -403,12 +403,11 @@ class Addproduct extends Component {
                                 }
                             </Card>
                         </Row>
-                        <Form>
+                        <Form style={{backgroundColor:"#ffc61a"}} >
                             <FormGroup>
                                 <p>
                                     <label>category :&nbsp;&nbsp;</label>
                                     <select className="mr-5" onClick={e=>this.setState({category:e.target.value})} >
-                                        <option value="Fashion" >Fashion</option>
                                         <option value="Furniture" >Furniture</option>
                                         <option value="Electronic" >Electronic</option>
                                         <option value="Cellphone" >Cellphone</option>
@@ -433,7 +432,7 @@ class Addproduct extends Component {
                                     <label>Name :&nbsp;</label>
                                     <input type="text" className="mr-5" style={{width:"510px"}} onChange={e=>this.setState({name:e.target.value})} />
                                     <label>Price (IDR) :&nbsp;</label>
-                                    <input style={{width:"210px"}} onChange={e=>this.setState({price:e.target.value})} />
+                                    <input placeholder="no dots or commas" style={{width:"210px"}} onChange={e=>this.setState({price:e.target.value})} />
                                 </p>
                                 <p>
                                     <label>Color :&nbsp;</label>

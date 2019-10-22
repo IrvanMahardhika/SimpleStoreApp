@@ -181,17 +181,17 @@ class Listproduct extends Component {
                         <table className="table-bordered" style={{width:"1000px"}} >
                             <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
                                 <td></td>
-                                <td className="p-2 text-center " >Category</td>
-                                <td className="p-2 text-center " >Brand</td>
-                                <td className="p-2 text-center " >Name</td>
-                                <td className="p-2 text-center " >Desc</td>
-                                <td className="p-2 text-center " >Stock</td>
-                                <td className="p-2 text-center " >EA</td>
-                                <td className="p-2 text-center " >Price (IDR)</td>
-                                <td className="p-2 text-center " >Pic 1</td>
-                                <td className="p-2 text-center " >Pic 2</td>
-                                <td className="p-2 text-center " >Pic 3</td>
-                                <td className="p-2 text-center " ></td>
+                                <td className="p-2 text-center align-text-top" >Category</td>
+                                <td className="p-2 text-center align-text-top" >Brand</td>
+                                <td className="p-2 text-center align-text-top" >Name</td>
+                                <td className="p-2 text-center align-text-top" >Desc</td>
+                                <td className="p-2 text-center align-text-top" >Stock</td>
+                                <td className="p-2 text-center align-text-top" >EA</td>
+                                <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                <td className="p-2 text-center align-text-top" >Pic 1</td>
+                                <td className="p-2 text-center align-text-top" >Pic 2</td>
+                                <td className="p-2 text-center align-text-top" >Pic 3</td>
+                                <td className="p-2 text-center align-text-top" ></td>
                             </thead>
                             <tbody>
                                 {this.renderUnapprovedProductList()}
@@ -206,17 +206,17 @@ class Listproduct extends Component {
                         <table className="table-bordered" style={{width:"1000px"}} >
                             <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
                                 <td></td>
-                                <td className="p-2 text-center " >Category</td>
-                                <td className="p-2 text-center " >Brand</td>
-                                <td className="p-2 text-center " >Name</td>
-                                <td className="p-2 text-center " >Desc</td>
-                                <td className="p-2 text-center " >Stock</td>
-                                <td className="p-2 text-center " >EA</td>
-                                <td className="p-2 text-center " >Price (IDR)</td>
-                                <td className="p-2 text-center " >Pic 1</td>
-                                <td className="p-2 text-center " >Pic 2</td>
-                                <td className="p-2 text-center " >Pic 3</td>
-                                <td className="p-2 text-center " ></td>
+                                <td className="p-2 text-center align-text-top" >Category</td>
+                                <td className="p-2 text-center align-text-top" >Brand</td>
+                                <td className="p-2 text-center align-text-top" >Name</td>
+                                <td className="p-2 text-center align-text-top" >Desc</td>
+                                <td className="p-2 text-center align-text-top" >Stock</td>
+                                <td className="p-2 text-center align-text-top" >EA</td>
+                                <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                <td className="p-2 text-center align-text-top" >Pic 1</td>
+                                <td className="p-2 text-center align-text-top" >Pic 2</td>
+                                <td className="p-2 text-center align-text-top" >Pic 3</td>
+                                <td className="p-2 text-center align-text-top" ></td>
                             </thead>
                             <tbody>
                                 {this.renderApprovedProductList()}

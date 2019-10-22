@@ -131,7 +131,6 @@ class Header extends Component {
                                     Category
                                 </DropdownToggle>
                                 <DropdownMenu>
-                                    <DropdownItem>Fashion</DropdownItem>
                                     <DropdownItem>Furniture</DropdownItem>
                                     <DropdownItem>Electronic</DropdownItem>
                                     <DropdownItem>Cellphone</DropdownItem>
@@ -220,7 +219,6 @@ class Header extends Component {
                                     Category
                                 </DropdownToggle>
                                 <DropdownMenu>
-                                    <DropdownItem>Fashion</DropdownItem>
                                     <DropdownItem>Furniture</DropdownItem>
                                     <DropdownItem>Electronic</DropdownItem>
                                     <DropdownItem>Cell Phone</DropdownItem>

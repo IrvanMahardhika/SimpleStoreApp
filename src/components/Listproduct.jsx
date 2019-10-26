@@ -16,7 +16,8 @@ class Listproduct extends Component {
             productBrand : "",
             productName : "",
             productColor : "",
-            ProductWeight : "",
+            productWeight : "",
+            productDimension : "",
             productDescription : ""
         };
         this.toggle = this.toggle.bind(this);
@@ -77,7 +78,7 @@ class Listproduct extends Component {
                     <td className="p-2 text-center align-text-top" >{val.brand}</td>
                     <td className="p-2 text-center align-text-top" >{val.name}</td>
                     <td className="p-2 text-center " >
-                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productBrand:val.brand,productName:val.name,productColor:val.color,ProductWeight:val.weight,productDescription:val.description})}} >Show</Button>
+                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productBrand:val.brand,productName:val.name,productColor:val.color,productWeight:val.weight,productDimension:val.dimension,productDescription:val.description})}} >Show</Button>
                     </td>
                     <td className="p-2 text-center align-text-top" >{val.inventory}</td>
                     <td className="p-2 text-center align-text-top" >{val.measurement}</td>
@@ -109,7 +110,7 @@ class Listproduct extends Component {
                     <td className="p-2 text-center align-text-top" >{val.brand}</td>
                     <td className="p-2 text-center align-text-top" >{val.name}</td>
                     <td className="p-2 text-center " >
-                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productBrand:val.brand,productName:val.name,productColor:val.color,ProductWeight:val.weight,productDescription:val.description})}} >Show</Button>
+                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productBrand:val.brand,productName:val.name,productColor:val.color,productWeight:val.weight,productDimension:val.dimension,productDescription:val.description})}} >Show</Button>
                     </td>
                     <td className="p-2 text-center align-text-top" >{val.inventory}</td>
                     <td className="p-2 text-center align-text-top" >{val.measurement}</td>
@@ -143,7 +144,10 @@ class Listproduct extends Component {
                         Color : {this.state.productColor}
                         <br></br>
                         <br></br>
-                        Weight : {this.state.ProductWeight} kg/each
+                        Weight : {this.state.productWeight} kg/each
+                        <br></br>
+                        <br></br>
+                        Dimension : {this.state.productDimension} cm
                         <br></br>
                         <br></br>
                         Description :

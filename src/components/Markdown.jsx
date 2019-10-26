@@ -3,31 +3,56 @@ import {connect} from "react-redux";
 import {Redirect} from "react-router-dom";
 import axios from "axios";
 import NumberFormat from "react-number-format";
-import { Button, Input, FormGroup, FormFeedback, Col, Label, Modal, ModalHeader,  ModalBody, ModalFooter } from 'reactstrap';
+import {Button, Input, FormGroup, FormFeedback, Badge, Label} from 'reactstrap';
 
 class Markdown extends Component {
 
     state = {
         productList : [],
+        productListFurniture : [],
         markdown : [],
         showPercent : [],
         showValue : [],
-        forReRender : true
+        forReRender : true,
+        uploadMarkdown : [],
+        startDate : "",
+        startMonth : "",
+        startYear : "",
+        endDate : "",
+        endMonth : "",
+        endYear : "",
+        markdown1List : [], markdown2List : [], markdown3List : [], markdown4List : [], markdown5List : [],
+        global : false,
+        filterCategory : "",
+        blankPercent : "",
+        blankPercent1 :[],
+        blankValue : "",
+        blankValue1 :[]
     }
 
     componentDidMount () {
         let storage = JSON.parse(localStorage.getItem("userData"))
         if (storage) {
-            this.getApprovedProductList()
+            this.clear()
+            this.getProductList()
+            this.getMarkdown1()
+            this.getMarkdown2()
+            this.getMarkdown3()
+            this.getMarkdown4()
+            this.getMarkdown5()
         }
+    }
+
+    clear = ()=>{
         let a = []
         let b = []
         let c = []
         for (let i=0; i<this.state.productList.length; i++) {a.push("a");b.push("a");c.push("a")}
-        this.setState({markdown:a,showPercent:b,showValue:c})
+        this.setState({markdown:a,showPercent:b,showValue:c,uploadMarkdown:[],blankPercent:"",blankValue:"",
+            endDate:"",endMonth:"",endYear:"",startDate:"",startMonth:"",startYear:""})
     }
 
-    getApprovedProductList = ()=>{
+    getProductList = ()=>{
         let token = localStorage.getItem("token")
         axios.get("http://localhost:5555/prod/getapprovedproduct", {
             params : {
@@ -39,39 +64,356 @@ class Markdown extends Component {
         })
         .then(res=>{
             this.setState({productList:res.data})
+            let a = []
+            let b = []
+            let c = []
+            for (let i=0; i<this.state.productList.length; i++) {a.push("a");b.push("a");c.push("a")}
+            this.setState({markdown:a,showPercent:b,showValue:c})
         })
         .catch()
     }
 
-    getMarkdown = (val,index,price,type)=>{
+    testMarkdown = (value,index,price,type)=>{
+        let a = this.state.markdown
+        let b = this.state.showPercent
+        let c = this.state.showValue
         switch (true) {
-            case val==="":
-                this.state.markdown[index]=0
-                this.state.showPercent[index]="a"
-                this.state.showValue[index]="a"
-                this.setState({forReRender:true})
+            case value==="" && this.state.global===false:
+                a[index]=0
+                b[index]="a"
+                c[index]="a"
+                this.setState({markdown:a,showPercent:b,showValue:c})
                 break;
-            case type===1:
-                let z=price*val/100    
-                this.state.markdown[index]=z
-                this.state.showPercent[index]=val
-                this.state.showValue[index]="b"
-                this.setState({forReRender:true})
+            case value==="" && this.state.global===true:
+                a=a.map(val=>0)
+                b=b.map(val=>"a")
+                c=c.map(val=>"a")
+                this.setState({markdown:a,showPercent:b,showValue:c})
                 break;
-            case type===2:
-                this.state.markdown[index]=val
-                this.state.showValue[index]=val
-                this.state.showPercent[index]="b"
-                this.setState({forReRender:true})
+            case type===1 && this.state.global===false:
+                let z1=price*value/100    
+                a[index]=z1
+                b[index]=value
+                c[index]="b"
+                this.setState({markdown:a,showPercent:b,showValue:c})
                 break;
+            case type===1 && this.state.global===true && this.state.filterCategory!=="":
+                let z3 = this.state.productList.filter(val=>val.category===this.state.filterCategory).map(val=>val.price*value/100)
+                a=z3
+                b=b.map(val=>value)
+                c=c.map(val=>"b")
+                this.setState({markdown:a,showPercent:b,showValue:c})
+                break
+            case type===1 && this.state.global===true && this.state.filterCategory==="":
+                let z2 = this.state.productList.map(val=>val.price*value/100)
+                a=z2
+                b=b.map(val=>value)
+                c=c.map(val=>"b")
+                this.setState({markdown:a,showPercent:b,showValue:c})
+                break;
+            case type===2 && this.state.global===false:
+                value = value.replace(/,/g,"")
+                a[index]=value
+                b[index]="b"
+                c[index]=value
+                this.setState({markdown:a,showPercent:b,showValue:c})
+                break;
+            case type===2 && this.state.global===true:
+                value = value.replace(/,/g,"")
+                a=a.map(val=>value)
+                b=b.map(val=>"b")
+                c=c.map(val=>value)
+                this.setState({markdown:a,showPercent:b,showValue:c})
+                break;
+            default:
+                break
+        }
+    }
+
+    getUploadMarkdown = (value,productId)=>{
+        switch (true) {
+            case value==="":
+                break
+            case this.state.global===false:
+                value = value.replace(/,/g,"")
+                let y={
+                    markdown : value,
+                    productId : productId
+                }
+                let z = this.state.uploadMarkdown.filter(val=>val.productId!==productId)
+                z.push(y)
+                this.setState({uploadMarkdown:z})
+                break
+            case this.state.global===true && this.state.filterCategory==="":
+                value = value.replace(/,/g,"")
+                let x = this.state.productList.map(val=>val.productId)
+                let v = []
+                for (let i=0; i<x.length; i++) {
+                    let w={
+                        markdown : value,
+                        productId : x[i]
+                    }
+                    v.push(w)
+                }
+                this.setState({uploadMarkdown:v})
+                break
+            case this.state.global===true && this.state.filterCategory!=="":
+                value = value.replace(/,/g,"")
+                let s = this.state.productList.filter(val=>val.category===this.state.filterCategory).map(val=>val.productId)
+                let t = []
+                for (let i=0; i<s.length; i++) {
+                    let u={
+                        markdown : value,
+                        productId : s[i]
+                    }
+                    t.push(u)
+                }
+                this.setState({uploadMarkdown:t})
+                break
+            default:
+                break;
+        }
+    }
+
+    uploadMarkdown = ()=>{
+        let data = {}
+        switch (true) {
+            case this.state.markdown1List.length===0:
+                data = {...data, markdownname : "Markdown 1"}
+                break;
+            case this.state.markdown2List.length===0:
+                data = {...data, markdownname : "Markdown 2"}
+                break;
+            case this.state.markdown3List.length===0:
+                data = {...data, markdownname : "Markdown 3"}
+                break;
+            case this.state.markdown4List.length===0:
+                data = {...data, markdownname : "Markdown 4"}
+                break;
+            case this.state.markdown5List.length===0:
+                data = {...data, markdownname : "Markdown 5"}
+                break;
+            default:
+                break;
+        }
+        let start = []
+        let end = []
+        let d = new Date()
+        let a = d.getFullYear()
+        let b = d.getMonth()+1
+        let c = d.getDate()
+        switch (true) {
+            case !this.state.startYear || !this.state.startMonth || !this.state.startDate:
+                alert("select start period")
+                break;
+            case !this.state.endYear || !this.state.endMonth || !this.state.endDate:
+                alert("select end period")
+                break;
+            case parseInt(this.state.startYear)===a && parseInt(this.state.startMonth)<=b && parseInt(this.state.startDate)<=c :
+                alert("start period at least has to be tomorrow")
+                break
+            case this.state.uploadMarkdown.length===0:
+                alert("there is no markdown to be saved")
+                break;
+            default:
+                start.push(this.state.startYear)
+                start.push(this.state.startMonth)
+                start.push(this.state.startDate)
+                start = start.join("")
+                data = {...data, start}
+                end.push(this.state.endYear)
+                end.push(this.state.endMonth)
+                end.push(this.state.endDate)
+                end = end.join("")
+                data = {...data, end}
+                this.state.uploadMarkdown.map(val=>{
+                    if (val.markdown<100) {
+                        axios.post("http://localhost:5555/prod/addmarkdown", data)
+                        .then(res=>{
+                            axios.put("http://localhost:5555/prod/addmarkdownfinal", {
+                                productId : val.productId,
+                                discpercent : val.markdown,
+                                markdownId : res.data.insertId
+                            }).then().catch()
+                            this.getMarkdown1()
+                            this.getMarkdown2()
+                            this.getMarkdown3()
+                            this.getMarkdown4()
+                            this.getMarkdown5() 
+                        })
+                        .catch()
+                    } else {
+                        axios.post("http://localhost:5555/prod/addmarkdown", data)
+                        .then(res=>{
+                            axios.put("http://localhost:5555/prod/addmarkdownfinal", {
+                                productId : val.productId,
+                                discvalue : val.markdown,
+                                markdownId : res.data.insertId
+                            }).then().catch()
+                            this.getMarkdown1()
+                            this.getMarkdown2()
+                            this.getMarkdown3()
+                            this.getMarkdown4()
+                            this.getMarkdown5()
+                        })
+                        .catch()
+                    }
+                })
+                alert("Markdown has been added, and will take effect on the set date.\nCheck your markdowns below.")
+                this.clear()        
+                break;
+        }   
+    }
+
+    getMarkdown1 = ()=>{
+        let token = localStorage.getItem("token")
+        axios.get("http://localhost:5555/prod/getmarkdown1", {
+            params : {
+                storename : this.props.loginRedux[0].storename
+            },
+            headers : {
+                authorization : token
+            }
+        })
+        .then(res=>{
+            this.setState({markdown1List:res.data})
+        })
+        .catch()
+    }
+
+    getMarkdown2 = ()=>{
+        let token = localStorage.getItem("token")
+        axios.get("http://localhost:5555/prod/getmarkdown2", {
+            params : {
+                storename : this.props.loginRedux[0].storename
+            },
+            headers : {
+                authorization : token
+            }
+        })
+        .then(res=>{
+            this.setState({markdown2List:res.data})
+        })
+        .catch()
+    }
+
+    getMarkdown3 = ()=>{
+        let token = localStorage.getItem("token")
+        axios.get("http://localhost:5555/prod/getmarkdown3", {
+            params : {
+                storename : this.props.loginRedux[0].storename
+            },
+            headers : {
+                authorization : token
+            }
+        })
+        .then(res=>{
+            this.setState({markdown3List:res.data})
+        })
+        .catch()
+    }
+
+    getMarkdown4 = ()=>{
+        let token = localStorage.getItem("token")
+        axios.get("http://localhost:5555/prod/getmarkdown4", {
+            params : {
+                storename : this.props.loginRedux[0].storename
+            },
+            headers : {
+                authorization : token
+            }
+        })
+        .then(res=>{
+            this.setState({markdown4List:res.data})
+        })
+        .catch()
+    }
+
+    getMarkdown5 = ()=>{
+        let token = localStorage.getItem("token")
+        axios.get("http://localhost:5555/prod/getmarkdown5", {
+            params : {
+                storename : this.props.loginRedux[0].storename
+            },
+            headers : {
+                authorization : token
+            }
+        })
+        .then(res=>{
+            this.setState({markdown5List:res.data})
+        })
+        .catch()
+    }
+
+    deleteMarkdown = (value)=>{
+        switch (true) {
+            case value===1:
+                this.state.markdown1List.map(val=>{
+                    axios.delete("http://localhost:5555/prod/deletemarkdown/"+val.markdownId)
+                    .then(res=>{
+                        this.getMarkdown1()
+                    })
+                    .catch()
+                })
+                alert("Markdown 1 has been deleted")
+                break;
+            case value===2:
+                this.state.markdown2List.map(val=>{
+                    axios.delete("http://localhost:5555/prod/deletemarkdown/"+val.markdownId)
+                    .then(res=>{
+                        this.getMarkdown2()
+                    })
+                    .catch()
+                })
+                alert("Markdown 2 has been deleted")
+                break;
+            case value===3:
+                this.state.markdown3List.map(val=>{
+                    axios.delete("http://localhost:5555/prod/deletemarkdown/"+val.markdownId)
+                    .then(res=>{
+                        this.getMarkdown3()
+                    })
+                    .catch()
+                })
+                alert("Markdown 3 has been deleted")
+                break;
+            case value===4:
+                this.state.markdown4List.map(val=>{
+                    axios.delete("http://localhost:5555/prod/deletemarkdown/"+val.markdownId)
+                    .then(res=>{
+                        this.getMarkdown4()
+                    })
+                    .catch()
+                })
+                alert("Markdown 4 has been deleted")
+                break;
+            case value===5:
+                this.state.markdown5List.map(val=>{
+                    axios.delete("http://localhost:5555/prod/deletemarkdown/"+val.markdownId)
+                    .then(res=>{
+                        this.getMarkdown5()
+                    })
+                    .catch()
+                })
+                alert("Markdown 5 has been deleted")
+                break;
+            default:
+                break;
+        }
+        this.setState({global:false,filterCategory:""})
+        this.clear()
+        var ele = document.getElementsByName("radio1")
+        for (var i=0; i<ele.length;i++){
+            if (i===0){ele[i].checked=true}
+            else {ele[i].checked=false}
         }
     }
 
     renderYear = ()=>{
         let d = new Date()
-        let x = d.getFullYear()-12
+        let x = d.getFullYear()
         let y = []
-        for(let i=0; i<60; i++){y.push(x-i)}
+        for(let i=0; i<3; i++){y.push(x+i)}
         let z = y.map(val=>{
             return (
                 <option value={val} >{val}</option>
@@ -94,7 +436,7 @@ class Markdown extends Component {
         return z
     }
 
-    renderApprovedProductList = ()=>{
+    renderAllProductOneByOne = ()=>{
         let map = this.state.productList.map((val,index)=>{
             return (
                 <tr>
@@ -112,19 +454,271 @@ class Markdown extends Component {
                     </td>
                     <td className="p-2 text-center " >
                         <FormGroup className="m-0">
-                            <Input invalid={this.state.showPercent[index]<10} style={{width:"60px"}} disabled={this.state.showPercent[index]==="b"} onChange={e=>this.getMarkdown(e.target.value,index,val.price,1)} />
+                            <NumberFormat disabled={this.state.showPercent[index]==="b"} maxLength="2" value={this.state.showPercent[index]} style={{width:"60px"}} decimalScale="0" onBlur={e=>this.getUploadMarkdown(e.target.value,val.productId)} onChange={e=>{this.testMarkdown(e.target.value,index,val.price,1)}} />
+                            <Input invalid={this.state.showPercent[index]<10} className="d-none" />
                             <FormFeedback onInvalid>min 10%</FormFeedback>
                         </FormGroup>
                     </td>
                     <td className="p-2 text-center " >
                         <FormGroup className="m-0">
-                            <Input invalid={this.state.showValue[index]<10000} style={{width:"110px"}} disabled={this.state.showValue[index]==="b"} onChange={e=>this.getMarkdown(e.target.value,index,val.price,2)} />
+                            <NumberFormat disabled={this.state.showValue[index]==="b"} value={this.state.showValue[index]} style={{width:"140px"}} decimalScale="0" thousandSeparator={true} onBlur={e=>this.getUploadMarkdown(e.target.value,val.productId)} onChange={e=>{this.testMarkdown(e.target.value,index,val.price,2)}} />
+                            <Input invalid={this.state.showValue[index]<10000} className="d-none" />
                             <FormFeedback onInvalid>min IDR 10000</FormFeedback>
                         </FormGroup>
                     </td>
                     <td className="p-2 text-center align-text-top text-success" >
                         <NumberFormat value={val.price-this.state.markdown[index]} displayType={'text'} thousandSeparator={true} />
                     </td>
+                </tr>
+            )
+        })
+        return map
+    }
+
+    renderAllProductGlobal = ()=>{
+        if (this.state.filterCategory) {
+            let map = this.state.productList.filter(val=>val.category===this.state.filterCategory).map((val,index)=>{
+                return (
+                    <tr>
+                        <td className="p-2 text-center align-text-top" >{index+1}</td>
+                        <td className="p-2 text-center align-text-top" >{val.category}</td>
+                        <td className="p-2 text-center align-text-top" >{val.brand}</td>
+                        <td className="p-2 text-center align-text-top" >{val.name}</td>
+                        <td className="p-2 text-center align-text-top" >{val.inventory}</td>
+                        <td className="p-2 text-center align-text-top" >{val.measurement}</td>
+                        <td className="p-2 text-center align-text-top" >
+                            <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                        <td className="p-2 text-center align-text-top" >
+                            <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
+                        </td>
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price- parseInt(this.state.markdown[index]) } displayType={'text'} thousandSeparator={true} />
+                        </td>
+                    </tr>
+                )
+            })
+            return map
+        } else {
+            let map = this.state.productList.map((val,index)=>{
+                return (
+                    <tr>
+                        <td className="p-2 text-center align-text-top" >{index+1}</td>
+                        <td className="p-2 text-center align-text-top" >{val.category}</td>
+                        <td className="p-2 text-center align-text-top" >{val.brand}</td>
+                        <td className="p-2 text-center align-text-top" >{val.name}</td>
+                        <td className="p-2 text-center align-text-top" >{val.inventory}</td>
+                        <td className="p-2 text-center align-text-top" >{val.measurement}</td>
+                        <td className="p-2 text-center align-text-top" >
+                            <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                        <td className="p-2 text-center align-text-top" >
+                            <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
+                        </td>
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price-this.state.markdown[index]} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                    </tr>
+                )
+            })
+            return map
+        }
+    }
+
+    renderMarkdown1 = ()=>{
+        let map = this.state.markdown1List.map((val,index)=>{
+            return (
+                <tr>
+                    <td className="p-2 text-center align-text-top" >{index+1}</td>
+                    <td className="p-2 text-center align-text-top" >{val.category}</td>
+                    <td className="p-2 text-center align-text-top" >{val.brand}</td>
+                    <td className="p-2 text-center align-text-top" >{val.name}</td>
+                    <td className="p-2 text-center align-text-top" >{val.inventory}</td>
+                    <td className="p-2 text-center align-text-top" >{val.measurement}</td>
+                    <td className="p-2 text-center align-text-top" >
+                        <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    <td className="p-2 text-center align-text-top" >
+                        <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
+                    </td>
+                    <td className="p-2 text-center " >
+                        {val.discpercent}
+                    </td>
+                    <td className="p-2 text-center " >
+                        <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    {
+                        val.discpercent!==null
+                        ?
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price*(100-val.discpercent)/100} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                        :
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price-val.discvalue} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                    }
+                    
+                </tr>
+            )
+        })
+        return map
+    }
+
+    renderMarkdown2 = ()=>{
+        let map = this.state.markdown2List.map((val,index)=>{
+            return (
+                <tr>
+                    <td className="p-2 text-center align-text-top" >{index+1}</td>
+                    <td className="p-2 text-center align-text-top" >{val.category}</td>
+                    <td className="p-2 text-center align-text-top" >{val.brand}</td>
+                    <td className="p-2 text-center align-text-top" >{val.name}</td>
+                    <td className="p-2 text-center align-text-top" >{val.inventory}</td>
+                    <td className="p-2 text-center align-text-top" >{val.measurement}</td>
+                    <td className="p-2 text-center align-text-top" >
+                        <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    <td className="p-2 text-center align-text-top" >
+                        <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
+                    </td>
+                    <td className="p-2 text-center " >
+                        {val.discpercent}
+                    </td>
+                    <td className="p-2 text-center " >
+                        <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    {
+                        val.discpercent!==null
+                        ?
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price*(100-val.discpercent)/100} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                        :
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price-val.discvalue} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                    }
+                    
+                </tr>
+            )
+        })
+        return map
+    }
+
+    renderMarkdown3 = ()=>{
+        let map = this.state.markdown3List.map((val,index)=>{
+            return (
+                <tr>
+                    <td className="p-2 text-center align-text-top" >{index+1}</td>
+                    <td className="p-2 text-center align-text-top" >{val.category}</td>
+                    <td className="p-2 text-center align-text-top" >{val.brand}</td>
+                    <td className="p-2 text-center align-text-top" >{val.name}</td>
+                    <td className="p-2 text-center align-text-top" >{val.inventory}</td>
+                    <td className="p-2 text-center align-text-top" >{val.measurement}</td>
+                    <td className="p-2 text-center align-text-top" >
+                        <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    <td className="p-2 text-center align-text-top" >
+                        <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
+                    </td>
+                    <td className="p-2 text-center " >
+                        {val.discpercent}
+                    </td>
+                    <td className="p-2 text-center " >
+                        <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    {
+                        val.discpercent!==null
+                        ?
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price*(100-val.discpercent)/100} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                        :
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price-val.discvalue} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                    }
+                    
+                </tr>
+            )
+        })
+        return map
+    }
+
+    renderMarkdown4 = ()=>{
+        let map = this.state.markdown4List.map((val,index)=>{
+            return (
+                <tr>
+                    <td className="p-2 text-center align-text-top" >{index+1}</td>
+                    <td className="p-2 text-center align-text-top" >{val.category}</td>
+                    <td className="p-2 text-center align-text-top" >{val.brand}</td>
+                    <td className="p-2 text-center align-text-top" >{val.name}</td>
+                    <td className="p-2 text-center align-text-top" >{val.inventory}</td>
+                    <td className="p-2 text-center align-text-top" >{val.measurement}</td>
+                    <td className="p-2 text-center align-text-top" >
+                        <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    <td className="p-2 text-center align-text-top" >
+                        <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
+                    </td>
+                    <td className="p-2 text-center " >
+                        {val.discpercent}
+                    </td>
+                    <td className="p-2 text-center " >
+                        <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    {
+                        val.discpercent!==null
+                        ?
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price*(100-val.discpercent)/100} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                        :
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price-val.discvalue} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                    }
+                    
+                </tr>
+            )
+        })
+        return map
+    }
+
+    renderMarkdown5 = ()=>{
+        let map = this.state.markdown5List.map((val,index)=>{
+            return (
+                <tr>
+                    <td className="p-2 text-center align-text-top" >{index+1}</td>
+                    <td className="p-2 text-center align-text-top" >{val.category}</td>
+                    <td className="p-2 text-center align-text-top" >{val.brand}</td>
+                    <td className="p-2 text-center align-text-top" >{val.name}</td>
+                    <td className="p-2 text-center align-text-top" >{val.inventory}</td>
+                    <td className="p-2 text-center align-text-top" >{val.measurement}</td>
+                    <td className="p-2 text-center align-text-top" >
+                        <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    <td className="p-2 text-center align-text-top" >
+                        <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
+                    </td>
+                    <td className="p-2 text-center " >
+                        {val.discpercent}
+                    </td>
+                    <td className="p-2 text-center " >
+                        <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    {
+                        val.discpercent!==null
+                        ?
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price*(100-val.discpercent)/100} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                        :
+                        <td className="p-2 text-center align-text-top text-success" >
+                            <NumberFormat value={val.price-val.discvalue} displayType={'text'} thousandSeparator={true} />
+                        </td>
+                    }
+                    
                 </tr>
             )
         })
@@ -138,102 +732,384 @@ class Markdown extends Component {
                     <div className="mt-3 mx-5" id="curtain">
                         <h1>{this.props.loginRedux[0].storename}'s Product Price Markdown</h1>
                         <br></br>
-                        <table className="border mb-1" style={{width:"1000px"}} >
-                            <thead>
-                                <tr>
-                                    <td className="h5 pl-3 border-bottom" colSpan="2" >
-                                        Markdown 1
-                                    </td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <span className="ml-3" >Start Date :&nbsp;
-                                            <select >{this.renderDate()}</select>
-                                            &nbsp;
-                                            <select >
-                                                <option value="01" >Jan</option>
-                                                <option value="02" >Feb</option>
-                                                <option value="03" >Mar</option>
-                                                <option value="04" >Apr</option>
-                                                <option value="05" >May</option>
-                                                <option value="06" >Jun</option>
-                                                <option value="07" >Jul</option>
-                                                <option value="08" >Agt</option>
-                                                <option value="09" >Sep</option>
-                                                <option value="10" >Oct</option>
-                                                <option value="11" >Nov</option>
-                                                <option value="12" >Dec</option>
-                                            </select>
-                                            &nbsp;
-                                            <select >{this.renderYear()}</select>
-                                        </span>
-                                    </td>
-                                    <td className="border-left" rowSpan="2">
-                                        <FormGroup className="ml-5" tag="fieldset">
-                                            <Label className="mt-1 mb-2" check>
-                                                <Input type="radio" name="radio1" value="Male" />
-                                                Set markdown one by one
-                                            </Label>
-                                            <br></br>
-                                            <Label check>
-                                                <Input type="radio" name="radio1" value="Female" />
-                                                Set markdown globally
-                                            </Label>
-                                        </FormGroup>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span className="ml-3" >End Date :&nbsp;
-                                            <select >{this.renderDate()}</select>
-                                            &nbsp;
-                                            <select >
-                                                <option value="01" >Jan</option>
-                                                <option value="02" >Feb</option>
-                                                <option value="03" >Mar</option>
-                                                <option value="04" >Apr</option>
-                                                <option value="05" >May</option>
-                                                <option value="06" >Jun</option>
-                                                <option value="07" >Jul</option>
-                                                <option value="08" >Agt</option>
-                                                <option value="09" >Sep</option>
-                                                <option value="10" >Oct</option>
-                                                <option value="11" >Nov</option>
-                                                <option value="12" >Dec</option>
-                                            </select>
-                                            &nbsp;
-                                            <select >{this.renderYear()}</select>
-                                        </span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table className="table-bordered" style={{width:"1000px"}} >
-                            <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
-                                <td></td>
-                                <td className="p-2 text-center align-text-top" >Category</td>
-                                <td className="p-2 text-center align-text-top" >Brand</td>
-                                <td className="p-2 text-center align-text-top" >Name</td>
-                                <td className="p-2 text-center align-text-top" >Inventory</td>
-                                <td className="p-2 text-center align-text-top" >EA</td>
-                                <td className="p-2 text-center align-text-top" >Price (IDR)</td>
-                                <td className="p-2 text-center align-text-top" >Pic</td>
-                                <td className="p-2 text-center align-text-top" >Markdown by %</td>
-                                <td className="p-2 text-center align-text-top" >Markdown by IDR</td>
-                                <td className="p-2 text-center align-text-top" >Price after markdown</td>
-                            </thead>
-                            <tbody>
-                                {this.renderApprovedProductList()}
-                                <tr>
-                                    <td colSpan="11" className="text-right" >
-                                        <Button className="m-1" >Save Markdown</Button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                            
-                        </table>
+                        {
+                            this.state.markdown1List.length>0 && this.state.markdown2List.length>0 && this.state.markdown3List.length>0 && this.state.markdown4List.length>0 && this.state.markdown5List.length>0
+                            ?
+                            <h5 className="mb-3" >
+                                You already use maximum amount of 5 markdowns.
+                                <br></br>
+                                Delete one of the markdown to set a new one.
+                            </h5>
+                            :
+                            <div>
+                                <table className="border mb-1" style={{width:"1000px"}} >
+                                    <thead>
+                                        <tr>
+                                            <td className="h5 pl-3 border-bottom" colSpan="2" >
+                                                Set Markdown
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td className="border-right" rowSpan="2">
+                                                <FormGroup className="ml-5" tag="fieldset">
+                                                    <Label className="mt-1 mb-2" check>
+                                                        <Input type="radio" name="radio1" onClick={()=>{this.setState({global:false});this.clear()}} defaultChecked />
+                                                        Set markdown one by one
+                                                    </Label>
+                                                    <br></br>
+                                                    <Label check>
+                                                        <Input type="radio" name="radio1" onClick={()=>{this.setState({global:true});this.clear()}} />
+                                                        Set markdown globally
+                                                    </Label>
+                                                </FormGroup>
+                                            </td>
+                                            <td > 
+                                                <span className="ml-3" >Start Date :&nbsp;
+                                                    <select value={this.state.startDate} onClick={e=>this.setState({startDate:e.target.value})} >
+                                                        <option value="" >Date</option>
+                                                        {this.renderDate()}
+                                                    </select>
+                                                    &nbsp;
+                                                    <select value={this.state.startMonth} onClick={e=>this.setState({startMonth:e.target.value})} >
+                                                        <option value="" >Month</option>
+                                                        <option value="01" >Jan</option>
+                                                        <option value="02" >Feb</option>
+                                                        <option value="03" >Mar</option>
+                                                        <option value="04" >Apr</option>
+                                                        <option value="05" >May</option>
+                                                        <option value="06" >Jun</option>
+                                                        <option value="07" >Jul</option>
+                                                        <option value="08" >Agt</option>
+                                                        <option value="09" >Sep</option>
+                                                        <option value="10" >Oct</option>
+                                                        <option value="11" >Nov</option>
+                                                        <option value="12" >Dec</option>
+                                                    </select>
+                                                    &nbsp;
+                                                    <select value={this.state.startYear} onClick={e=>this.setState({startYear:e.target.value})} >
+                                                        <option value="" >Year</option>
+                                                        {this.renderYear()}
+                                                    </select>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span className="ml-3" >End Date :&nbsp;
+                                                    <select value={this.state.endDate} onClick={e=>this.setState({endDate:e.target.value})} >
+                                                        <option value="" >Date</option>
+                                                        {this.renderDate()}
+                                                    </select>
+                                                    &nbsp;
+                                                    <select value={this.state.endMonth} onClick={e=>this.setState({endMonth:e.target.value})} >
+                                                        <option value="" >Month</option>
+                                                        <option value="01" >Jan</option>
+                                                        <option value="02" >Feb</option>
+                                                        <option value="03" >Mar</option>
+                                                        <option value="04" >Apr</option>
+                                                        <option value="05" >May</option>
+                                                        <option value="06" >Jun</option>
+                                                        <option value="07" >Jul</option>
+                                                        <option value="08" >Agt</option>
+                                                        <option value="09" >Sep</option>
+                                                        <option value="10" >Oct</option>
+                                                        <option value="11" >Nov</option>
+                                                        <option value="12" >Dec</option>
+                                                    </select>
+                                                    &nbsp;
+                                                    <select value={this.state.endYear} onClick={e=>this.setState({endYear:e.target.value})} >
+                                                        <option value="" >Year</option>
+                                                        {this.renderYear()}
+                                                    </select>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {
+                                            this.state.global===true
+                                            ?
+                                            <tr className="border-top">
+                                                <td colSpan="2" >
+                                                    <FormGroup className="ml-5" tag="fieldset">
+                                                        <Label className="mt-1 mr-5" check>
+                                                            <Input type="radio" name="radio2" value="" onClick={e=>{this.setState({filterCategory:e.target.value});this.clear()}} defaultChecked />
+                                                            All Category
+                                                        </Label>
+                                                        <Label className="mt-1 mr-5" check>
+                                                            <Input type="radio" name="radio2" value="Furniture" onClick={e=>{this.setState({filterCategory:e.target.value});this.clear()}} />
+                                                            Furniture
+                                                        </Label>
+                                                        <Label className="mt-1 mr-5" check>
+                                                            <Input type="radio" name="radio2" value="Electronic" onClick={e=>{this.setState({filterCategory:e.target.value});this.clear()}} />
+                                                            Electronic
+                                                        </Label>
+                                                        <Label className="mt-1 mr-5" check>
+                                                            <Input type="radio" name="radio2" value="Cellphone" onClick={e=>{this.setState({filterCategory:e.target.value});this.clear()}} />
+                                                            Cellphone
+                                                        </Label>
+                                                        <Label className="mt-1 mr-5" check>
+                                                            <Input type="radio" name="radio2" value="Notebook" onClick={e=>{this.setState({filterCategory:e.target.value});this.clear()}} />
+                                                            Notebook
+                                                        </Label>
+                                                        <Label className="mt-1 mr-5" check>
+                                                            <Input type="radio" name="radio2" value="Sport" onClick={e=>{this.setState({filterCategory:e.target.value});this.clear()}} />
+                                                            Sport
+                                                        </Label>
+                                                    </FormGroup>
+                                                </td>
+                                            </tr>
+                                            :
+                                            null
+                                        }
+                                    </tbody>
+                                </table>
+                                {
+                                    this.state.global===false
+                                    ?
+                                    <div>
+                                        <table className="table-bordered mb-5" style={{width:"1000px"}} >
+                                            <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
+                                                <td></td>
+                                                <td className="p-2 text-center align-text-top" >Category</td>
+                                                <td className="p-2 text-center align-text-top" >Brand</td>
+                                                <td className="p-2 text-center align-text-top" >Name</td>
+                                                <td className="p-2 text-center align-text-top" >Inventory</td>
+                                                <td className="p-2 text-center align-text-top" >EA</td>
+                                                <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                                <td className="p-2 text-center align-text-top" >Pic</td>
+                                                <td className="p-2 text-center align-text-top" >Markdown by %</td>
+                                                <td className="p-2 text-center align-text-top" >Markdown by IDR</td>
+                                                <td className="p-2 text-center align-text-top" >Price after markdown</td>
+                                            </thead>
+                                            <tbody>
+                                                {this.renderAllProductOneByOne()}
+                                                <tr>
+                                                    <td colSpan="11" className="text-right" >
+                                                        <Button className="m-1" onClick={()=>{this.uploadMarkdown()}} >Save</Button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    :
+                                    <div>
+                                        <table className="table-bordered mb-5" style={{width:"1000px"}} >
+                                            <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
+                                                <td></td>
+                                                <td className="p-2 text-center align-text-top" >Category</td>
+                                                <td className="p-2 text-center align-text-top" >Brand</td>
+                                                <td className="p-2 text-center align-text-top" >Name</td>
+                                                <td className="p-2 text-center align-text-top" >Inventory</td>
+                                                <td className="p-2 text-center align-text-top" >EA</td>
+                                                <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                                <td className="p-2 text-center align-text-top" >Pic</td>
+                                                <td className="p-2 text-center align-text-top" >Price after markdown</td>
+                                            </thead>
+                                            <tbody>
+                                                {this.renderAllProductGlobal()}
+                                                <tr >
+                                                    <td className="p-2 " colSpan="4" >
+                                                        <FormGroup className="m-0">
+                                                            Markdown by % : &nbsp;
+                                                            <NumberFormat value={this.state.blankPercent} decimalScale="0" style={{width:"60px"}} disabled={this.state.showPercent[0]==="b"} maxLength="2" onBlur={e=>this.getUploadMarkdown(e.target.value,null)} onChange={e=>{this.testMarkdown(e.target.value,null,null,1);this.setState({blankPercent:e.target.value})}} />
+                                                            <Input invalid={this.state.showPercent[0]<10} className="d-none" />
+                                                            <FormFeedback style={{marginLeft:"140px"}} onInvalid>min 10%</FormFeedback>
+                                                        </FormGroup>
+                                                    </td>
+                                                    <td className="p-2 " colSpan="4" >
+                                                        <FormGroup className="m-0">
+                                                            Markdown by IDR : &nbsp;
+                                                            <NumberFormat value={this.state.blankValue} decimalScale="0" disabled={this.state.showValue[0]==="b"} thousandSeparator={true} onBlur={e=>this.getUploadMarkdown(e.target.value,null)} onChange={e=>{this.testMarkdown(e.target.value,null,null,2);this.setState({blankValue:e.target.value})}} />
+                                                            <Input invalid={this.state.showValue[0]<10000} className="d-none" />
+                                                            <FormFeedback style={{marginLeft:"150px"}} onInvalid>min IDR 10000</FormFeedback>
+                                                        </FormGroup>
+                                                    </td>
+                                                    <td colSpan="3" className="text-right" >
+                                                        <Button className="m-1" onClick={()=>{this.uploadMarkdown()}} >Save</Button>
+                                                    </td>
+                                                </tr>
+                                                <tr >
+                                                    <td className="px-2 " colSpan="9" >
+                                                        Click <Badge color="secondary" >save</Badge> before moving to other category
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        {
+                            this.state.markdown1List.length>0
+                            ?
+                            <div>
+                                <h5>Markdown 1</h5>
+                                <span className="mr-2" >{new Date(this.state.markdown1List[0].start).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span> to
+                                <span className="ml-2" >{new Date(this.state.markdown1List[0].end).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span>
+                                <table className="table-bordered mb-1" style={{width:"1000px"}} >
+                                    <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
+                                        <td></td>
+                                        <td className="p-2 text-center align-text-top" >Category</td>
+                                        <td className="p-2 text-center align-text-top" >Brand</td>
+                                        <td className="p-2 text-center align-text-top" >Name</td>
+                                        <td className="p-2 text-center align-text-top" >Inventory</td>
+                                        <td className="p-2 text-center align-text-top" >EA</td>
+                                        <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                        <td className="p-2 text-center align-text-top" >Pic</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by %</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by IDR</td>
+                                        <td className="p-2 text-center align-text-top" >Price after markdown</td>
+                                    </thead>
+                                    <tbody>
+                                        {this.renderMarkdown1()}
+                                        <tr>
+                                            <td colSpan="11" className="text-right" >
+                                                <Button className="m-1" onClick={()=>this.deleteMarkdown(1)} >Delete Markdown</Button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            :
+                            null
+                        }
+                        {
+                            this.state.markdown2List.length>0
+                            ?
+                            <div>
+                                <h5>Markdown 2</h5>
+                                <span className="mr-2" >{new Date(this.state.markdown2List[0].start).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span> to
+                                <span className="ml-2" >{new Date(this.state.markdown2List[0].end).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span>
+                                <table className="table-bordered mb-1" style={{width:"1000px"}} >
+                                    <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
+                                        <td></td>
+                                        <td className="p-2 text-center align-text-top" >Category</td>
+                                        <td className="p-2 text-center align-text-top" >Brand</td>
+                                        <td className="p-2 text-center align-text-top" >Name</td>
+                                        <td className="p-2 text-center align-text-top" >Inventory</td>
+                                        <td className="p-2 text-center align-text-top" >EA</td>
+                                        <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                        <td className="p-2 text-center align-text-top" >Pic</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by %</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by IDR</td>
+                                        <td className="p-2 text-center align-text-top" >Price after markdown</td>
+                                    </thead>
+                                    <tbody>
+                                        {this.renderMarkdown2()}
+                                        <tr>
+                                            <td colSpan="11" className="text-right" >
+                                                <Button className="m-1" onClick={()=>this.deleteMarkdown(2)} >Delete Markdown</Button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            :
+                            null
+                        }
+                        {
+                            this.state.markdown3List.length>0
+                            ?
+                            <div>
+                                <h5>Markdown 3</h5>
+                                <span className="mr-2" >{new Date(this.state.markdown3List[0].start).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span> to
+                                <span className="ml-2" >{new Date(this.state.markdown3List[0].end).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span>
+                                <table className="table-bordered mb-1" style={{width:"1000px"}} >
+                                    <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
+                                        <td></td>
+                                        <td className="p-2 text-center align-text-top" >Category</td>
+                                        <td className="p-2 text-center align-text-top" >Brand</td>
+                                        <td className="p-2 text-center align-text-top" >Name</td>
+                                        <td className="p-2 text-center align-text-top" >Inventory</td>
+                                        <td className="p-2 text-center align-text-top" >EA</td>
+                                        <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                        <td className="p-2 text-center align-text-top" >Pic</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by %</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by IDR</td>
+                                        <td className="p-2 text-center align-text-top" >Price after markdown</td>
+                                    </thead>
+                                    <tbody>
+                                        {this.renderMarkdown3()}
+                                        <tr>
+                                            <td colSpan="11" className="text-right" >
+                                                <Button className="m-1" onClick={()=>this.deleteMarkdown(3)} >Delete Markdown</Button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            :
+                            null
+                        }
+                        {
+                            this.state.markdown4List.length>0
+                            ?
+                            <div>
+                                <h5>Markdown 4</h5>
+                                <span className="mr-2" >{new Date(this.state.markdown4List[0].start).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span> to
+                                <span className="ml-2" >{new Date(this.state.markdown4List[0].end).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span>
+                                <table className="table-bordered mb-1" style={{width:"1000px"}} >
+                                    <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
+                                        <td></td>
+                                        <td className="p-2 text-center align-text-top" >Category</td>
+                                        <td className="p-2 text-center align-text-top" >Brand</td>
+                                        <td className="p-2 text-center align-text-top" >Name</td>
+                                        <td className="p-2 text-center align-text-top" >Inventory</td>
+                                        <td className="p-2 text-center align-text-top" >EA</td>
+                                        <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                        <td className="p-2 text-center align-text-top" >Pic</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by %</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by IDR</td>
+                                        <td className="p-2 text-center align-text-top" >Price after markdown</td>
+                                    </thead>
+                                    <tbody>
+                                        {this.renderMarkdown4()}
+                                        <tr>
+                                            <td colSpan="11" className="text-right" >
+                                                <Button className="m-1" onClick={()=>this.deleteMarkdown(4)} >Delete Markdown</Button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            :
+                            null
+                        }
+                        {
+                            this.state.markdown5List.length>0
+                            ?
+                            <div>
+                                <h5>Markdown 5</h5>
+                                <span className="mr-2" >{new Date(this.state.markdown5List[0].start).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span> to
+                                <span className="ml-2" >{new Date(this.state.markdown5List[0].end).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span>
+                                <table className="table-bordered mb-1" style={{width:"1000px"}} >
+                                    <thead style={{backgroundColor:"#ffc61a"}} className="font-weight-bold">
+                                        <td></td>
+                                        <td className="p-2 text-center align-text-top" >Category</td>
+                                        <td className="p-2 text-center align-text-top" >Brand</td>
+                                        <td className="p-2 text-center align-text-top" >Name</td>
+                                        <td className="p-2 text-center align-text-top" >Inventory</td>
+                                        <td className="p-2 text-center align-text-top" >EA</td>
+                                        <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                        <td className="p-2 text-center align-text-top" >Pic</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by %</td>
+                                        <td className="p-2 text-center align-text-top" >Markdown by IDR</td>
+                                        <td className="p-2 text-center align-text-top" >Price after markdown</td>
+                                    </thead>
+                                    <tbody>
+                                        {this.renderMarkdown5()}
+                                        <tr>
+                                            <td colSpan="11" className="text-right" >
+                                                <Button className="m-1" onClick={()=>this.deleteMarkdown(5)} >Delete Markdown</Button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            :
+                            null
+                        }
                         <Button className="my-3" href="/Listproduct">Back to List Product</Button>
                     </div>
                 )
@@ -250,4 +1126,3 @@ const mapStateToProps = state => {
 }
 
 export default connect(mapStateToProps,{})(Markdown)
-

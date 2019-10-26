@@ -363,9 +363,13 @@ class Editprofile extends Component {
                                             <span className="mr-3">Birthdate : {new Date(this.props.loginRedux[0].birthdate).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span>
                                             :
                                             <span className="mr-3">Birthdate :
-                                                <select onClick={e=>this.setState({birthdateDate:e.target.value})} >{this.renderDate()}</select>
+                                                <select onClick={e=>this.setState({birthdateDate:e.target.value})} >
+                                                    <option value="" >Date</option>
+                                                    {this.renderDate()}
+                                                </select>
                                                 &nbsp;
                                                 <select onClick={e=>this.setState({birthdateMonth:e.target.value})} >
+                                                    <option value="" >Month</option>
                                                     <option value="01" >Jan</option>
                                                     <option value="02" >Feb</option>
                                                     <option value="03" >Mar</option>
@@ -380,7 +384,10 @@ class Editprofile extends Component {
                                                     <option value="12" >Dec</option>
                                                 </select>
                                                 &nbsp;
-                                                <select onClick={e=>this.setState({birthdateYear:e.target.value})} >{this.renderYear()}</select>
+                                                <select onClick={e=>this.setState({birthdateYear:e.target.value})} >
+                                                    <option value="" >Year</option>
+                                                    {this.renderYear()}
+                                                </select>
                                             </span>
                                         }
                                         {

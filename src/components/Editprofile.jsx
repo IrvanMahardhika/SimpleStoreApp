@@ -116,9 +116,33 @@ class Editprofile extends Component {
 
     renderDate = ()=>{
         let y = []
-        for(let i=1; i<32; i++){
-            if (i<10) {y.push("0"+i)}
-            else {y.push(i)}
+        switch (true) {
+            case parseInt(this.state.birthdateMonth)===1|| parseInt(this.state.birthdateMonth)===3|| parseInt(this.state.birthdateMonth)===5|| parseInt(this.state.birthdateMonth)===7|| parseInt(this.state.birthdateMonth)===8|| parseInt(this.state.birthdateMonth)===10|| parseInt(this.state.birthdateMonth)===12:
+                for(let i=1; i<32; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.birthdateMonth)===4|| parseInt(this.state.birthdateMonth)===6|| parseInt(this.state.birthdateMonth)===9|| parseInt(this.state.birthdateMonth)===11:
+                for(let i=1; i<31; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.birthdateMonth)===2 && parseInt(this.state.birthdateYear)%4===0:
+                for(let i=1; i<30; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.birthdateMonth)===2 && parseInt(this.state.birthdateYear)%4!==0:
+                    for(let i=1; i<29; i++){
+                        if (i<10) {y.push("0"+i)}
+                        else {y.push(i)}
+                    }
+                    break;
+            default:
+                break;
         }
         let z = y.map(val=>{
             return (
@@ -363,12 +387,12 @@ class Editprofile extends Component {
                                             <span className="mr-3">Birthdate : {new Date(this.props.loginRedux[0].birthdate).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}</span>
                                             :
                                             <span className="mr-3">Birthdate :
-                                                <select onClick={e=>this.setState({birthdateDate:e.target.value})} >
+                                                <select disabled={!this.state.birthdateMonth||!this.state.birthdateYear} onClick={e=>this.setState({birthdateDate:e.target.value})} >
                                                     <option value="" >Date</option>
                                                     {this.renderDate()}
                                                 </select>
                                                 &nbsp;
-                                                <select onClick={e=>this.setState({birthdateMonth:e.target.value})} >
+                                                <select onClick={e=>this.setState({birthdateMonth:e.target.value,birthdateDate:""})} >
                                                     <option value="" >Month</option>
                                                     <option value="01" >Jan</option>
                                                     <option value="02" >Feb</option>
@@ -384,7 +408,7 @@ class Editprofile extends Component {
                                                     <option value="12" >Dec</option>
                                                 </select>
                                                 &nbsp;
-                                                <select onClick={e=>this.setState({birthdateYear:e.target.value})} >
+                                                <select onClick={e=>this.setState({birthdateYear:e.target.value,birthdateDate:""})} >
                                                     <option value="" >Year</option>
                                                     {this.renderYear()}
                                                 </select>

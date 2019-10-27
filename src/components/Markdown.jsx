@@ -25,9 +25,7 @@ class Markdown extends Component {
         global : false,
         filterCategory : "",
         blankPercent : "",
-        blankPercent1 :[],
-        blankValue : "",
-        blankValue1 :[]
+        blankValue : ""
     }
 
     componentDidMount () {
@@ -132,7 +130,12 @@ class Markdown extends Component {
 
     getUploadMarkdown = (value,productId)=>{
         switch (true) {
-            case value==="":
+            case value==="" && this.state.global===false:
+                let r = this.state.uploadMarkdown.filter(val=>val.productId!==productId)
+                this.setState({uploadMarkdown:r})
+                break
+            case value==="" && this.state.global===true:
+                this.setState({uploadMarkdown:[]})
                 break
             case this.state.global===false:
                 value = value.replace(/,/g,"")
@@ -206,11 +209,14 @@ class Markdown extends Component {
             case !this.state.startYear || !this.state.startMonth || !this.state.startDate:
                 alert("select start period")
                 break;
+            case (parseInt(this.state.startYear)===a && parseInt(this.state.startMonth)<b) || (parseInt(this.state.startYear)===a && parseInt(this.state.startMonth)===b && parseInt(this.state.startDate)<=c) :
+                alert("start period at least has to be tomorrow")
+                break
             case !this.state.endYear || !this.state.endMonth || !this.state.endDate:
                 alert("select end period")
                 break;
-            case parseInt(this.state.startYear)===a && parseInt(this.state.startMonth)<=b && parseInt(this.state.startDate)<=c :
-                alert("start period at least has to be tomorrow")
+            case (parseInt(this.state.endYear)===parseInt(this.state.startYear) && parseInt(this.state.endMonth)<parseInt(this.state.startMonth)) || (parseInt(this.state.endYear)===parseInt(this.state.startYear) && parseInt(this.state.endMonth)===parseInt(this.state.startMonth) && parseInt(this.state.endDate)<=parseInt(this.state.startDate)) :
+                alert("end period at least has to be the next day after start period")
                 break
             case this.state.uploadMarkdown.length===0:
                 alert("there is no markdown to be saved")
@@ -227,40 +233,61 @@ class Markdown extends Component {
                 end = end.join("")
                 data = {...data, end}
                 this.state.uploadMarkdown.map(val=>{
-                    if (val.markdown<100) {
-                        axios.post("http://localhost:5555/prod/addmarkdown", data)
-                        .then(res=>{
-                            axios.put("http://localhost:5555/prod/addmarkdownfinal", {
-                                productId : val.productId,
-                                discpercent : val.markdown,
-                                markdownId : res.data.insertId
-                            }).then().catch()
-                            this.getMarkdown1()
-                            this.getMarkdown2()
-                            this.getMarkdown3()
-                            this.getMarkdown4()
-                            this.getMarkdown5() 
-                        })
-                        .catch()
-                    } else {
-                        axios.post("http://localhost:5555/prod/addmarkdown", data)
-                        .then(res=>{
-                            axios.put("http://localhost:5555/prod/addmarkdownfinal", {
-                                productId : val.productId,
-                                discvalue : val.markdown,
-                                markdownId : res.data.insertId
-                            }).then().catch()
-                            this.getMarkdown1()
-                            this.getMarkdown2()
-                            this.getMarkdown3()
-                            this.getMarkdown4()
-                            this.getMarkdown5()
-                        })
-                        .catch()
-                    }
-                })
-                alert("Markdown has been added, and will take effect on the set date.\nCheck your markdowns below.")
-                this.clear()        
+                    let token = localStorage.getItem("token")
+                    axios.get("http://localhost:5555/prod/checkmarkdown", {
+                        params : {
+                            storename : this.props.loginRedux[0].storename,
+                            productId : val.productId,
+                            start : start
+                        },
+                        headers : {
+                            authorization : token
+                        }
+                    })
+                    .then(res=>{
+                        switch (true) {
+                            case res.data.length>0:
+                                alert(`${res.data[0].brand} ${res.data[0].name} has already set for another markdown until ${new Date(res.data[0].end).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})},\nCheck ${res.data[0].markdownname} below`)
+                                break;
+                            default:
+                                if (val.markdown<100) {
+                                    axios.post("http://localhost:5555/prod/addmarkdown", data)
+                                    .then(res=>{
+                                        axios.put("http://localhost:5555/prod/addmarkdownfinal", {
+                                            productId : val.productId,
+                                            discpercent : val.markdown,
+                                            markdownId : res.data.insertId
+                                        }).then().catch()
+                                        this.getMarkdown1()
+                                        this.getMarkdown2()
+                                        this.getMarkdown3()
+                                        this.getMarkdown4()
+                                        this.getMarkdown5() 
+                                    })
+                                    .catch()
+                                } else {
+                                    axios.post("http://localhost:5555/prod/addmarkdown", data)
+                                    .then(res=>{
+                                        axios.put("http://localhost:5555/prod/addmarkdownfinal", {
+                                            productId : val.productId,
+                                            discvalue : val.markdown,
+                                            markdownId : res.data.insertId
+                                        }).then().catch()
+                                        this.getMarkdown1()
+                                        this.getMarkdown2()
+                                        this.getMarkdown3()
+                                        this.getMarkdown4()
+                                        this.getMarkdown5()
+                                    })
+                                    .catch()
+                                }
+                                alert("Markdown has been added, and will take effect on the set date.\nCheck your markdowns below.")
+                                this.clear()
+                                break;
+                        }
+                    })
+                    .catch()     
+                })      
                 break;
         }   
     }
@@ -422,11 +449,73 @@ class Markdown extends Component {
         return z
     }
 
-    renderDate = ()=>{
+    renderStartDate = ()=>{
         let y = []
-        for(let i=1; i<32; i++){
-            if (i<10) {y.push("0"+i)}
-            else {y.push(i)}
+        switch (true) {
+            case parseInt(this.state.startMonth)===1|| parseInt(this.state.startMonth)===3|| parseInt(this.state.startMonth)===5|| parseInt(this.state.startMonth)===7|| parseInt(this.state.startMonth)===8|| parseInt(this.state.startMonth)===10|| parseInt(this.state.startMonth)===12:
+                for(let i=1; i<32; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.startMonth)===4|| parseInt(this.state.startMonth)===6|| parseInt(this.state.startMonth)===9|| parseInt(this.state.startMonth)===11:
+                for(let i=1; i<31; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.startMonth)===2 && parseInt(this.state.startYear)%4===0:
+                for(let i=1; i<30; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.startMonth)===2 && parseInt(this.state.startYear)%4!==0:
+                    for(let i=1; i<29; i++){
+                        if (i<10) {y.push("0"+i)}
+                        else {y.push(i)}
+                    }
+                    break;
+            default:
+                break;
+        }
+        let z = y.map(val=>{
+            return (
+                <option value={val} >{val}</option>
+            )
+        })
+        return z
+    }
+
+    renderEndDate = ()=>{
+        let y = []
+        switch (true) {
+            case parseInt(this.state.endMonth)===1|| parseInt(this.state.endMonth)===3|| parseInt(this.state.endMonth)===5|| parseInt(this.state.endMonth)===7|| parseInt(this.state.endMonth)===8|| parseInt(this.state.endMonth)===10|| parseInt(this.state.endMonth)===12:
+                for(let i=1; i<32; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.endMonth)===4|| parseInt(this.state.endMonth)===6|| parseInt(this.state.endMonth)===9|| parseInt(this.state.endMonth)===11:
+                for(let i=1; i<31; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.endMonth)===2 && parseInt(this.state.endYear)%4===0:
+                for(let i=1; i<30; i++){
+                    if (i<10) {y.push("0"+i)}
+                    else {y.push(i)}
+                }
+                break;
+            case parseInt(this.state.endMonth)===2 && parseInt(this.state.endYear)%4!==0:
+                    for(let i=1; i<29; i++){
+                        if (i<10) {y.push("0"+i)}
+                        else {y.push(i)}
+                    }
+                    break;
+            default:
+                break;
         }
         let z = y.map(val=>{
             return (
@@ -767,12 +856,12 @@ class Markdown extends Component {
                                             </td>
                                             <td > 
                                                 <span className="ml-3" >Start Date :&nbsp;
-                                                    <select value={this.state.startDate} onClick={e=>this.setState({startDate:e.target.value})} >
+                                                    <select disabled={!this.state.startMonth||!this.state.startYear} value={this.state.startDate} onClick={e=>this.setState({startDate:e.target.value})} >
                                                         <option value="" >Date</option>
-                                                        {this.renderDate()}
+                                                        {this.renderStartDate()}
                                                     </select>
                                                     &nbsp;
-                                                    <select value={this.state.startMonth} onClick={e=>this.setState({startMonth:e.target.value})} >
+                                                    <select value={this.state.startMonth} onClick={e=>this.setState({startMonth:e.target.value,startDate:""})} >
                                                         <option value="" >Month</option>
                                                         <option value="01" >Jan</option>
                                                         <option value="02" >Feb</option>
@@ -788,7 +877,7 @@ class Markdown extends Component {
                                                         <option value="12" >Dec</option>
                                                     </select>
                                                     &nbsp;
-                                                    <select value={this.state.startYear} onClick={e=>this.setState({startYear:e.target.value})} >
+                                                    <select value={this.state.startYear} onClick={e=>this.setState({startYear:e.target.value,startDate:""})} >
                                                         <option value="" >Year</option>
                                                         {this.renderYear()}
                                                     </select>
@@ -798,12 +887,12 @@ class Markdown extends Component {
                                         <tr>
                                             <td>
                                                 <span className="ml-3" >End Date :&nbsp;
-                                                    <select value={this.state.endDate} onClick={e=>this.setState({endDate:e.target.value})} >
+                                                    <select disabled={!this.state.endMonth||!this.state.endYear} value={this.state.endDate} onClick={e=>this.setState({endDate:e.target.value})} >
                                                         <option value="" >Date</option>
-                                                        {this.renderDate()}
+                                                        {this.renderEndDate()}
                                                     </select>
                                                     &nbsp;
-                                                    <select value={this.state.endMonth} onClick={e=>this.setState({endMonth:e.target.value})} >
+                                                    <select value={this.state.endMonth} onClick={e=>this.setState({endMonth:e.target.value,endDate:""})} >
                                                         <option value="" >Month</option>
                                                         <option value="01" >Jan</option>
                                                         <option value="02" >Feb</option>
@@ -819,7 +908,7 @@ class Markdown extends Component {
                                                         <option value="12" >Dec</option>
                                                     </select>
                                                     &nbsp;
-                                                    <select value={this.state.endYear} onClick={e=>this.setState({endYear:e.target.value})} >
+                                                    <select value={this.state.endYear} onClick={e=>this.setState({endYear:e.target.value,endDate:""})} >
                                                         <option value="" >Year</option>
                                                         {this.renderYear()}
                                                     </select>

@@ -294,8 +294,9 @@ class Markdown extends Component {
 
     getMarkdown1 = ()=>{
         let token = localStorage.getItem("token")
-        axios.get("http://localhost:5555/prod/getmarkdown1", {
+        axios.get("http://localhost:5555/prod/getmarkdown", {
             params : {
+                markdownname : "Markdown 1",
                 storename : this.props.loginRedux[0].storename
             },
             headers : {
@@ -310,8 +311,9 @@ class Markdown extends Component {
 
     getMarkdown2 = ()=>{
         let token = localStorage.getItem("token")
-        axios.get("http://localhost:5555/prod/getmarkdown2", {
+        axios.get("http://localhost:5555/prod/getmarkdown", {
             params : {
+                markdownname : "Markdown 2",
                 storename : this.props.loginRedux[0].storename
             },
             headers : {
@@ -326,8 +328,9 @@ class Markdown extends Component {
 
     getMarkdown3 = ()=>{
         let token = localStorage.getItem("token")
-        axios.get("http://localhost:5555/prod/getmarkdown3", {
+        axios.get("http://localhost:5555/prod/getmarkdown", {
             params : {
+                markdownname : "Markdown 3",
                 storename : this.props.loginRedux[0].storename
             },
             headers : {
@@ -342,8 +345,9 @@ class Markdown extends Component {
 
     getMarkdown4 = ()=>{
         let token = localStorage.getItem("token")
-        axios.get("http://localhost:5555/prod/getmarkdown4", {
+        axios.get("http://localhost:5555/prod/getmarkdown", {
             params : {
+                markdownname : "Markdown 4",
                 storename : this.props.loginRedux[0].storename
             },
             headers : {
@@ -358,8 +362,9 @@ class Markdown extends Component {
 
     getMarkdown5 = ()=>{
         let token = localStorage.getItem("token")
-        axios.get("http://localhost:5555/prod/getmarkdown5", {
+        axios.get("http://localhost:5555/prod/getmarkdown", {
             params : {
+                markdownname : "Markdown 5",
                 storename : this.props.loginRedux[0].storename
             },
             headers : {

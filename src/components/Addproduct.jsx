@@ -5,6 +5,7 @@ import { Row, CustomInput, Card, Button, CardBody, CardFooter, CardImg, CardText
 import {connect} from "react-redux";
 import axios from "axios";
 import {Redirect} from "react-router-dom";
+import NumberFormat from "react-number-format";
 
 class Addproduct extends Component {
     
@@ -244,6 +245,12 @@ class Addproduct extends Component {
         .catch()
     }
 
+    inputPrice = (val) => {
+        val = val.replace(/,/g,"")
+        val = parseInt(val)
+        this.setState({price:val})
+    }
+
     addProduct = ()=>{
         switch (true) {
             case this.state.renderpic1 === "images/productpics/nopic.png":
@@ -432,7 +439,8 @@ class Addproduct extends Component {
                                     <label>Name :&nbsp;</label>
                                     <input type="text" className="mr-5" style={{width:"510px"}} onChange={e=>this.setState({name:e.target.value})} />
                                     <label>Price (IDR) :&nbsp;</label>
-                                    <input placeholder="no dots or commas" style={{width:"210px"}} onChange={e=>this.setState({price:e.target.value})} />
+                                    <NumberFormat thousandSeparator={true} decimalScale="0" allowNegative={false} style={{width:"210px"}} value={this.state.price} onChange={e=>this.inputPrice(e.target.value)} />
+                                    {/* <input placeholder="no dots or commas" style={{width:"210px"}} onChange={e=>this.setState({price:e.target.value})} /> */}
                                 </p>
                                 <p>
                                     <label>Color :&nbsp;</label>

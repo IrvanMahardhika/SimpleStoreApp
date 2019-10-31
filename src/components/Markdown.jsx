@@ -25,7 +25,8 @@ class Markdown extends Component {
         global : false,
         filterCategory : "",
         blankPercent : "",
-        blankValue : ""
+        blankValue : "",
+        continueSaveMarkdown : true
     }
 
     componentDidMount () {
@@ -128,7 +129,7 @@ class Markdown extends Component {
         }
     }
 
-    getUploadMarkdown = (value,productId)=>{
+    getUploadMarkdown = (value,productId,type)=>{
         switch (true) {
             case value==="" && this.state.global===false:
                 let r = this.state.uploadMarkdown.filter(val=>val.productId!==productId)
@@ -141,7 +142,8 @@ class Markdown extends Component {
                 value = value.replace(/,/g,"")
                 let y={
                     markdown : value,
-                    productId : productId
+                    productId : productId,
+                    type : type
                 }
                 let z = this.state.uploadMarkdown.filter(val=>val.productId!==productId)
                 z.push(y)
@@ -154,7 +156,8 @@ class Markdown extends Component {
                 for (let i=0; i<x.length; i++) {
                     let w={
                         markdown : value,
-                        productId : x[i]
+                        productId : x[i],
+                        type : type
                     }
                     v.push(w)
                 }
@@ -167,7 +170,8 @@ class Markdown extends Component {
                 for (let i=0; i<s.length; i++) {
                     let u={
                         markdown : value,
-                        productId : s[i]
+                        productId : s[i],
+                        type : type
                     }
                     t.push(u)
                 }
@@ -179,117 +183,143 @@ class Markdown extends Component {
     }
 
     uploadMarkdown = ()=>{
-        let data = {}
-        switch (true) {
-            case this.state.markdown1List.length===0:
-                data = {...data, markdownname : "Markdown 1"}
-                break;
-            case this.state.markdown2List.length===0:
-                data = {...data, markdownname : "Markdown 2"}
-                break;
-            case this.state.markdown3List.length===0:
-                data = {...data, markdownname : "Markdown 3"}
-                break;
-            case this.state.markdown4List.length===0:
-                data = {...data, markdownname : "Markdown 4"}
-                break;
-            case this.state.markdown5List.length===0:
-                data = {...data, markdownname : "Markdown 5"}
-                break;
-            default:
-                break;
+        let e = []
+        for (let i=0; i<this.state.uploadMarkdown.length; i++) {
+            let a = this.state.productList.filter(val=>val.productId===this.state.uploadMarkdown[i].productId)
+            e.push(a[0].price-parseInt(this.state.uploadMarkdown[i].markdown)) 
         }
-        let start = []
-        let end = []
-        let d = new Date()
-        let a = d.getFullYear()
-        let b = d.getMonth()+1
-        let c = d.getDate()
         switch (true) {
-            case !this.state.startYear || !this.state.startMonth || !this.state.startDate:
-                alert("select start period")
-                break;
-            case (parseInt(this.state.startYear)===a && parseInt(this.state.startMonth)<b) || (parseInt(this.state.startYear)===a && parseInt(this.state.startMonth)===b && parseInt(this.state.startDate)<=c) :
-                alert("start period at least has to be tomorrow")
-                break
-            case !this.state.endYear || !this.state.endMonth || !this.state.endDate:
-                alert("select end period")
-                break;
-            case (parseInt(this.state.endYear)===parseInt(this.state.startYear) && parseInt(this.state.endMonth)<parseInt(this.state.startMonth)) || (parseInt(this.state.endYear)===parseInt(this.state.startYear) && parseInt(this.state.endMonth)===parseInt(this.state.startMonth) && parseInt(this.state.endDate)<=parseInt(this.state.startDate)) :
-                alert("end period at least has to be the next day after start period")
-                break
             case this.state.uploadMarkdown.length===0:
                 alert("there is no markdown to be saved")
                 break;
-            default:
-                start.push(this.state.startYear)
-                start.push(this.state.startMonth)
-                start.push(this.state.startDate)
-                start = start.join("")
-                data = {...data, start}
-                end.push(this.state.endYear)
-                end.push(this.state.endMonth)
-                end.push(this.state.endDate)
-                end = end.join("")
-                data = {...data, end}
-                this.state.uploadMarkdown.map(val=>{
-                    let token = localStorage.getItem("token")
-                    axios.get("http://localhost:5555/prod/checkmarkdown", {
-                        params : {
-                            storename : this.props.loginRedux[0].storename,
-                            productId : val.productId,
-                            start : start
-                        },
-                        headers : {
-                            authorization : token
-                        }
-                    })
-                    .then(res=>{
-                        switch (true) {
-                            case res.data.length>0:
-                                alert(`${res.data[0].brand} ${res.data[0].name} has already set for another markdown until ${new Date(res.data[0].end).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})},\nCheck ${res.data[0].markdownname} below`)
-                                break;
-                            default:
-                                if (val.markdown<100) {
-                                    axios.post("http://localhost:5555/prod/addmarkdown", data)
-                                    .then(res=>{
-                                        axios.put("http://localhost:5555/prod/addmarkdownfinal", {
-                                            productId : val.productId,
-                                            discpercent : val.markdown,
-                                            markdownId : res.data.insertId
-                                        }).then().catch()
-                                        this.getMarkdown1()
-                                        this.getMarkdown2()
-                                        this.getMarkdown3()
-                                        this.getMarkdown4()
-                                        this.getMarkdown5() 
-                                    })
-                                    .catch()
-                                } else {
-                                    axios.post("http://localhost:5555/prod/addmarkdown", data)
-                                    .then(res=>{
-                                        axios.put("http://localhost:5555/prod/addmarkdownfinal", {
-                                            productId : val.productId,
-                                            discvalue : val.markdown,
-                                            markdownId : res.data.insertId
-                                        }).then().catch()
-                                        this.getMarkdown1()
-                                        this.getMarkdown2()
-                                        this.getMarkdown3()
-                                        this.getMarkdown4()
-                                        this.getMarkdown5()
-                                    })
-                                    .catch()
-                                }
-                                alert("Markdown has been added, and will take effect on the set date.\nCheck your markdowns below.")
-                                this.clear()
-                                break;
-                        }
-                    })
-                    .catch()     
-                })      
+            case e.filter(val=>val<=0).length>0:
+                alert("Your markdown must not resulting 0 price or lower")
                 break;
-        }   
+            case this.state.uploadMarkdown.filter(val=>val.type===2 && val.markdown<10000).length>0:
+                alert("Your markdown must at least IDR 10.000 or more")
+                break;
+            case this.state.uploadMarkdown.filter(val=>val.type===1 && val.markdown<10).length>0:
+                alert("Your markdown must at least 10% or more")
+                break;
+            default:
+                let data = {}
+                switch (true) {
+                    case this.state.markdown1List.length===0:
+                        data = {...data, markdownname : "Markdown 1"}
+                        break;
+                    case this.state.markdown2List.length===0:
+                        data = {...data, markdownname : "Markdown 2"}
+                        break;
+                    case this.state.markdown3List.length===0:
+                        data = {...data, markdownname : "Markdown 3"}
+                        break;
+                    case this.state.markdown4List.length===0:
+                        data = {...data, markdownname : "Markdown 4"}
+                        break;
+                    case this.state.markdown5List.length===0:
+                        data = {...data, markdownname : "Markdown 5"}
+                        break;
+                    default:
+                        break;
+                }
+                let start = []
+                let end = []
+                let d = new Date()
+                let a = d.getFullYear()
+                let b = d.getMonth()+1
+                let c = d.getDate()
+                switch (true) {
+                    case !this.state.startYear || !this.state.startMonth || !this.state.startDate:
+                        alert("select start period")
+                        break;
+                    case (parseInt(this.state.startYear)===a && parseInt(this.state.startMonth)<b) || (parseInt(this.state.startYear)===a && parseInt(this.state.startMonth)===b && parseInt(this.state.startDate)<=c) :
+                        alert("start period at least has to be tomorrow")
+                        break
+                    case !this.state.endYear || !this.state.endMonth || !this.state.endDate:
+                        alert("select end period")
+                        break;
+                    case (parseInt(this.state.endYear)===parseInt(this.state.startYear) && parseInt(this.state.endMonth)<parseInt(this.state.startMonth)) || (parseInt(this.state.endYear)===parseInt(this.state.startYear) && parseInt(this.state.endMonth)===parseInt(this.state.startMonth) && parseInt(this.state.endDate)<=parseInt(this.state.startDate)) :
+                        alert("end period at least has to be the next day after start period")
+                        break
+                    default:
+                        start.push(this.state.startYear)
+                        start.push(this.state.startMonth)
+                        start.push(this.state.startDate)
+                        start = start.join("")
+                        data = {...data, start}
+                        end.push(this.state.endYear)
+                        end.push(this.state.endMonth)
+                        end.push(this.state.endDate)
+                        end = end.join("")
+                        data = {...data, end}
+                        let continueAfterMap = []
+                        this.state.uploadMarkdown.map(val=>{
+                            let token = localStorage.getItem("token")
+                            axios.get("http://localhost:5555/prod/checkmarkdown", {
+                                params : {
+                                    storename : this.props.loginRedux[0].storename,
+                                    productId : val.productId,
+                                    start : start,
+                                    end : end
+                                },
+                                headers : {
+                                    authorization : token
+                                }
+                            })
+                            .then(res=>{
+                                continueAfterMap.push("go")
+                                if (res.data.length>0) {
+                                    alert(`Can not save markdown !\n\n${res.data[0].brand} ${res.data[0].name} has been set for another markdown,\n    from ${new Date(res.data[0].start).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}\n    until ${new Date(res.data[0].end).toLocaleDateString("id", {day:"numeric", month:"short", year:"numeric"})}.\n\nCheck ${res.data[0].markdownname} below`)
+                                    this.setState({continueSaveMarkdown:false})
+                                }
+                                if (this.state.continueSaveMarkdown===true && continueAfterMap.length===this.state.uploadMarkdown.length) {
+                                    this.state.uploadMarkdown.map(item=>{
+                                        if (item.markdown<100) {
+                                            axios.post("http://localhost:5555/prod/addmarkdown", data)
+                                            .then(pos=>{
+                                                axios.put("http://localhost:5555/prod/addmarkdownfinal", {
+                                                    productId : item.productId,
+                                                    discpercent : item.markdown,
+                                                    markdownId : pos.data.insertId
+                                                }).then().catch()
+                                                this.getMarkdown1()
+                                                this.getMarkdown2()
+                                                this.getMarkdown3()
+                                                this.getMarkdown4()
+                                                this.getMarkdown5() 
+                                            })
+                                            .catch()
+                                        } else {
+                                            axios.post("http://localhost:5555/prod/addmarkdown", data)
+                                            .then(pos=>{
+                                                axios.put("http://localhost:5555/prod/addmarkdownfinal", {
+                                                    productId : item.productId,
+                                                    discvalue : item.markdown,
+                                                    markdownId : pos.data.insertId
+                                                }).then().catch()
+                                                this.getMarkdown1()
+                                                this.getMarkdown2()
+                                                this.getMarkdown3()
+                                                this.getMarkdown4()
+                                                this.getMarkdown5()
+                                            })
+                                            .catch()
+                                        }
+                                    })
+                                    alert("Markdown has been saved, and will take effect on the set date.\nCheck your markdowns below.")
+                                    this.clear()
+                                }
+                                // if agar : mengembalikan state continueAfterMap menjadi true, stlh map pertama selesai
+                                if (continueAfterMap.length===this.state.uploadMarkdown.length) {
+                                    this.setState({continueSaveMarkdown:true})
+                                }
+                            })
+                            .catch()     
+                        })
+                        break;
+                }
+                break;
+        }    
     }
 
     getMarkdown1 = ()=>{
@@ -546,18 +576,18 @@ class Markdown extends Component {
                     <td className="p-2 text-center align-text-top" >
                         <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         <FormGroup className="m-0">
-                            <NumberFormat disabled={this.state.showPercent[index]==="b"} maxLength="2" value={this.state.showPercent[index]} style={{width:"60px"}} decimalScale="0" onBlur={e=>this.getUploadMarkdown(e.target.value,val.productId)} onChange={e=>{this.testMarkdown(e.target.value,index,val.price,1)}} />
+                            <NumberFormat allowNegative={false} disabled={this.state.showPercent[index]==="b"} maxLength="2" value={this.state.showPercent[index]} style={{width:"60px"}} decimalScale="0" onBlur={e=>this.getUploadMarkdown(e.target.value,val.productId,1)} onChange={e=>{this.testMarkdown(e.target.value,index,val.price,1)}} />
                             <Input invalid={this.state.showPercent[index]<10} className="d-none" />
                             <FormFeedback onInvalid>min 10%</FormFeedback>
                         </FormGroup>
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         <FormGroup className="m-0">
-                            <NumberFormat disabled={this.state.showValue[index]==="b"} value={this.state.showValue[index]} style={{width:"140px"}} decimalScale="0" thousandSeparator={true} onBlur={e=>this.getUploadMarkdown(e.target.value,val.productId)} onChange={e=>{this.testMarkdown(e.target.value,index,val.price,2)}} />
+                            <NumberFormat allowNegative={false} disabled={this.state.showValue[index]==="b"} value={this.state.showValue[index]} style={{width:"140px"}} decimalScale="0" thousandSeparator={true} onBlur={e=>this.getUploadMarkdown(e.target.value,val.productId,2)} onChange={e=>{this.testMarkdown(e.target.value,index,val.price,2)}} />
                             <Input invalid={this.state.showValue[index]<10000} className="d-none" />
-                            <FormFeedback onInvalid>min IDR 10000</FormFeedback>
+                            <FormFeedback onInvalid>min IDR 10.000</FormFeedback>
                         </FormGroup>
                     </td>
                     <td className="p-2 text-center align-text-top text-success" >
@@ -635,10 +665,10 @@ class Markdown extends Component {
                     <td className="p-2 text-center align-text-top" >
                         <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         {val.discpercent}
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
                     </td>
                     {
@@ -675,10 +705,10 @@ class Markdown extends Component {
                     <td className="p-2 text-center align-text-top" >
                         <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         {val.discpercent}
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
                     </td>
                     {
@@ -715,10 +745,10 @@ class Markdown extends Component {
                     <td className="p-2 text-center align-text-top" >
                         <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         {val.discpercent}
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
                     </td>
                     {
@@ -755,10 +785,10 @@ class Markdown extends Component {
                     <td className="p-2 text-center align-text-top" >
                         <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         {val.discpercent}
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
                     </td>
                     {
@@ -795,10 +825,10 @@ class Markdown extends Component {
                     <td className="p-2 text-center align-text-top" >
                         <img src={"http://localhost:5555/"+val.productpic1} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         {val.discpercent}
                     </td>
-                    <td className="p-2 text-center " >
+                    <td className="p-2 text-center align-text-top" >
                         <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
                     </td>
                     {
@@ -918,6 +948,8 @@ class Markdown extends Component {
                                                         {this.renderYear()}
                                                     </select>
                                                 </span>
+                                                <br></br>
+                                                <small className="ml-3">start by choosing <b>year</b>, then <b>month</b>, then <b>date</b></small>
                                             </td>
                                         </tr>
                                         {
@@ -977,6 +1009,11 @@ class Markdown extends Component {
                                                 <td className="p-2 text-center align-text-top" >Price after markdown</td>
                                             </thead>
                                             <tbody>
+                                                <tr>
+                                                    <td colSpan="11" className="text-right" >
+                                                        <small>Go to <b>Markdown by %</b> to set markdown based on %, <b>or</b> go to <b>Markdown by IDR</b> to set it by value</small>
+                                                    </td>
+                                                </tr>
                                                 {this.renderAllProductOneByOne()}
                                                 <tr>
                                                     <td colSpan="11" className="text-right" >
@@ -1002,11 +1039,16 @@ class Markdown extends Component {
                                             </thead>
                                             <tbody>
                                                 {this.renderAllProductGlobal()}
+                                                <tr>
+                                                    <td className="px-2 " colSpan="9" >
+                                                        <small>Go to <b>Markdown by %</b> to set markdown based on %, <b>or</b> go to <b>Markdown by IDR</b> to set it by value, then click <Badge color="secondary" >save</Badge> before moving to other category</small>
+                                                    </td>
+                                                </tr>
                                                 <tr >
                                                     <td className="p-2 " colSpan="4" >
                                                         <FormGroup className="m-0">
                                                             Markdown by % : &nbsp;
-                                                            <NumberFormat value={this.state.blankPercent} decimalScale="0" style={{width:"60px"}} disabled={this.state.showPercent[0]==="b"} maxLength="2" onBlur={e=>this.getUploadMarkdown(e.target.value,null)} onChange={e=>{this.testMarkdown(e.target.value,null,null,1);this.setState({blankPercent:e.target.value})}} />
+                                                            <NumberFormat allowNegative={false} value={this.state.blankPercent} decimalScale="0" style={{width:"60px"}} disabled={this.state.showPercent[0]==="b"} maxLength="2" onBlur={e=>this.getUploadMarkdown(e.target.value,null,1)} onChange={e=>{this.testMarkdown(e.target.value,null,null,1);this.setState({blankPercent:e.target.value})}} />
                                                             <Input invalid={this.state.showPercent[0]<10} className="d-none" />
                                                             <FormFeedback style={{marginLeft:"140px"}} onInvalid>min 10%</FormFeedback>
                                                         </FormGroup>
@@ -1014,20 +1056,16 @@ class Markdown extends Component {
                                                     <td className="p-2 " colSpan="4" >
                                                         <FormGroup className="m-0">
                                                             Markdown by IDR : &nbsp;
-                                                            <NumberFormat value={this.state.blankValue} decimalScale="0" disabled={this.state.showValue[0]==="b"} thousandSeparator={true} onBlur={e=>this.getUploadMarkdown(e.target.value,null)} onChange={e=>{this.testMarkdown(e.target.value,null,null,2);this.setState({blankValue:e.target.value})}} />
+                                                            <NumberFormat allowNegative={false} value={this.state.blankValue} decimalScale="0" disabled={this.state.showValue[0]==="b"} thousandSeparator={true} onBlur={e=>this.getUploadMarkdown(e.target.value,null,2)} onChange={e=>{this.testMarkdown(e.target.value,null,null,2);this.setState({blankValue:e.target.value})}} />
                                                             <Input invalid={this.state.showValue[0]<10000} className="d-none" />
-                                                            <FormFeedback style={{marginLeft:"150px"}} onInvalid>min IDR 10000</FormFeedback>
+                                                            <FormFeedback style={{marginLeft:"150px"}} onInvalid>min IDR 10.000</FormFeedback>
                                                         </FormGroup>
                                                     </td>
                                                     <td colSpan="3" className="text-right" >
                                                         <Button className="m-1" onClick={()=>{this.uploadMarkdown()}} >Save</Button>
                                                     </td>
                                                 </tr>
-                                                <tr >
-                                                    <td className="px-2 " colSpan="9" >
-                                                        Click <Badge color="secondary" >save</Badge> before moving to other category
-                                                    </td>
-                                                </tr>
+                                                
                                             </tbody>
                                         </table>
                                     </div>

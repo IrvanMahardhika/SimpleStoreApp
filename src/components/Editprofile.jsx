@@ -422,6 +422,16 @@ class Editprofile extends Component {
                                             <Button size="sm" onClick={e=>this.setState({editBirthDate:false,birthdateYear:"",birthdateMonth:"",birthdateDate:""})} >Cancel</Button>
                                         }
                                         <br></br>
+                                        {
+                                            this.state.editBirthDate===true
+                                            ?
+                                            <div>
+                                                <small className="ml-3">start by choosing <b>year</b>, then <b>month</b>, then <b>date</b></small>
+                                                <br></br>
+                                            </div>
+                                            :
+                                            null
+                                        }
                                         <br></br>
                                         {
                                             this.state.editGender===false

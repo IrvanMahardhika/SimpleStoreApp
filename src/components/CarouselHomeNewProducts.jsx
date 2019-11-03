@@ -2,13 +2,13 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import {
     Row, CustomInput, Card, Button, CardBody, CardFooter, CardImg, CardText,
-    CardHeader, CardTitle, CardSubtitle, Input, Form, FormGroup, Label,
+    CardHeader, CardImgOverlay, CardTitle, CardSubtitle, Input, Form, FormGroup, Label,
     Modal, ModalHeader, ModalBody, ModalFooter
 } from 'reactstrap';
 import axios from "axios";
 import NumberFormat from "react-number-format";
 import ItemsCarousel from 'react-items-carousel';
-import {Redirect} from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 
 class CarouselHomeNewProducts extends Component {
@@ -41,22 +41,43 @@ class CarouselHomeNewProducts extends Component {
         }
     }
 
-    gotoProductDetail = () => {
-        this.setState({ gotoProductDetail: true })
+    gotoProductDetail = (val) => {
+        this.setState({ gotoProductDetail: true, productId: val })
     }
 
     renderNewProduct = () => {
         let z = this.state.newProductList.map(val => {
-
             return (
-                <Card onClick={() => this.gotoProductDetail()} className="border-warning d-inline-block p-0" style={{ width: "150px", margin: "5px", fontSize: "12px" }}>
+                <Card id="pointer" onClick={() => this.gotoProductDetail(val.productId)} className="border-warning d-inline-block p-0" style={{ width: "150px", margin: "5px", fontSize: "12px" }}>
                     <CardImg className="m-1" top style={{ width: "140px", height: "100px", objectFit: "cover" }} src={"http://localhost:5555/" + val.productpic1} alt="Card image cap" />
+                    {
+                        val.discpercent !== null
+                            ?
+                            <CardImgOverlay className="p-1" >
+                                <CardTitle className="text-danger font-weight-bolder h6 text-right" >
+                                    - {val.discpercent}%
+                            </CardTitle>
+                            </CardImgOverlay>
+                            :
+                            null
+                    }
+                    {
+                        val.discvalue !== null
+                            ?
+                            <CardImgOverlay className="p-1" >
+                                <CardTitle className="text-danger font-weight-bolder h6 text-right" >
+                                    - IDR {val.discvalue}
+                                </CardTitle>
+                            </CardImgOverlay>
+                            :
+                            null
+                    }
                     <CardBody className="py-0">
                         <CardText >
                             <p className="m-0 font-weight-bold" >{val.brand}</p>
-                            <p className="mb-1" style={{ height: "40px" }} >{val.name}</p>
+                            <p className="m-0" style={{ height: "40px" }} >{val.name}</p>
                             {
-                                val.discpercent === null
+                                val.discpercent === null && val.discvalue === null
                                     ?
                                     <div >
                                         <NumberFormat className="border-0" prefix="IDR " style={{ width: "100px" }} thousandSeparator={true} />
@@ -65,15 +86,24 @@ class CarouselHomeNewProducts extends Component {
                                     :
                                     <div >
                                         <NumberFormat className="border-0" prefix="IDR " style={{ width: "100px", textDecorationLine: "line-through" }} value={val.price} thousandSeparator={true} />
-                                        <NumberFormat className="border-0 text-danger" prefix="IDR " style={{ width: "100px" }} value={val.price * (100 - val.discpercent) / 100} thousandSeparator={true} />
+                                        {
+                                            val.discvalue === null
+                                                ?
+                                                <div>
+                                                    <NumberFormat className="border-0 text-danger" prefix="IDR " style={{ width: "100px" }} value={val.price * (100 - val.discpercent) / 100} thousandSeparator={true} />
+                                                </div>
+                                                :
+                                                <div>
+                                                    <NumberFormat className="border-0 text-danger" prefix="IDR " style={{ width: "100px" }} value={val.price - val.discvalue} thousandSeparator={true} />
+                                                </div>
+                                        }
                                     </div>
                             }
                         </CardText>
                     </CardBody>
-                    <CardFooter>
+                    <CardFooter className="py-1">
                         <p className="my-0">{val.storename}</p>
                         <p className="my-0">{val.store_cityregency}</p>
-                        <p className="my-0">% successfull trans</p>
                     </CardFooter>
                 </Card>
             )
@@ -100,9 +130,9 @@ class CarouselHomeNewProducts extends Component {
                 </div>
             )
         } else {
-            return <Redirect to="/Productdetail" />
+            return <Redirect to={`/Productdetail/${this.state.productId}`} />
         }
-        
+
     }
 }
 

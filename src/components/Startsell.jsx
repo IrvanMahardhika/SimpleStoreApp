@@ -113,8 +113,9 @@ class Startsell extends Component {
         } else if (!this.state.acknowledge) {
             alert("Please check the term and privacy policy")
         } else {
-            this.setState({disabledTab1:true, disabledTab2:false}); 
-            this.toggle('2');
+            this.props.addStore(this.state,this.props.locationRedux[0].district,this.props.locationRedux[0].cityregency,this.props.locationRedux[0].province,this.props.loginRedux[0].userId)
+            this.setState({disabledTab2:true, disabledTab3:false}); 
+            this.toggle('3');
         }
     }
 
@@ -195,9 +196,8 @@ class Startsell extends Component {
         }
 
         if (this.state.cellphoneverified===1 && this.state.emailverified===1) {
-            this.props.addStore(this.state,this.props.locationRedux[0].district,this.props.locationRedux[0].cityregency,this.props.locationRedux[0].province,this.props.loginRedux[0].userId)
-            this.setState({disabledTab2:true, disabledTab3:false}); 
-            this.toggle('3'); 
+            this.setState({disabledTab1:true, disabledTab2:false}); 
+            this.toggle('2'); 
         }
     }
 
@@ -236,34 +236,6 @@ class Startsell extends Component {
                         </Nav>
                         <TabContent id="curtain" activeTab={this.state.activeTab}>
                             <TabPane style={{width:"500px"}} tabId="1">
-                                <Input autoFocus placeholder="Store name" className="my-3" onChange={e=>this.setState({storename:e.target.value})} />
-                                <p className="mb-1">Store Address :</p>
-                                <FormGroup>
-                                    <Input maxLength="5" invalid={!this.state.postalCode} placeholder="Postal code" onChange={e=>this.handleBlurPostalCode(e.target.value)} />
-                                    <FormFeedback onInvalid>Please type a correct postal code</FormFeedback>  
-                                </FormGroup>
-                                {
-                                    this.props.locationRedux.length>0
-                                    ?
-                                    <p>Province : {this.props.locationRedux[0].province} <br></br>
-                                        City/Regency : {this.props.locationRedux[0].cityregency} <br></br>
-                                        District : {this.props.locationRedux[0].district}
-                                    </p>
-                                    :
-                                    null
-                                }
-                                <Input disabled={!this.state.postalCode || this.state.postalCode==="a"} placeholder="Address (exp : JL.Roda No.3)" className="mb-3" onChange={e=>this.setState({address:e.target.value})} />
-                                <FormGroup check>
-                                    <Label check>
-                                        <Input type="checkbox" onClick={()=>{this.handleClickAcknowledge()}} />
-                                        I acknowledge that I have read and agree to the <a href="/">Terms and Privacy policy</a> of SimpleStore
-                                    </Label>
-                                </FormGroup>
-                                <Button className="btn-block my-3" onClick={()=>{this.continueClick1()}}>
-                                    Continue
-                                </Button>
-                            </TabPane>
-                            <TabPane style={{width:"500px"}} tabId="2">
                                 <h5 className="mt-3">Your e-mail and cellphone have to be verified to continue</h5>
                                 <Card className="my-3" body>
                                     <CardTitle className="h3" style={{textAlign:"center"}}>E-mail Verification</CardTitle>
@@ -358,10 +330,40 @@ class Startsell extends Component {
                                     Continue
                                 </Button>
                             </TabPane>
+                            <TabPane style={{width:"500px"}} tabId="2">
+                                <Input autoFocus placeholder="Store name" className="my-3" onChange={e=>this.setState({storename:e.target.value})} />
+                                <p className="mb-1">Store Address :</p>
+                                <FormGroup>
+                                    <Input maxLength="5" invalid={!this.state.postalCode} placeholder="Postal code" onChange={e=>this.handleBlurPostalCode(e.target.value)} />
+                                    <FormFeedback onInvalid>Please type a correct postal code</FormFeedback>  
+                                </FormGroup>
+                                {
+                                    this.props.locationRedux.length>0
+                                    ?
+                                    <p>Province : {this.props.locationRedux[0].province} <br></br>
+                                        City/Regency : {this.props.locationRedux[0].cityregency} <br></br>
+                                        District : {this.props.locationRedux[0].district}
+                                    </p>
+                                    :
+                                    null
+                                }
+                                <Input disabled={!this.state.postalCode || this.state.postalCode==="a"} placeholder="Address (exp : JL.Roda No.3)" className="mb-3" onChange={e=>this.setState({address:e.target.value})} />
+                                <FormGroup check>
+                                    <Label check>
+                                        <Input type="checkbox" onClick={()=>{this.handleClickAcknowledge()}} />
+                                        I acknowledge that I have read and agree to the <a href="/">Terms and Privacy policy</a> of SimpleStore
+                                    </Label>
+                                </FormGroup>
+                                <Button className="btn-block my-3" onClick={()=>{this.continueClick1()}}>
+                                    Continue
+                                </Button>
+                            </TabPane>
                             <TabPane style={{width:"500px"}} tabId="3">
                                 <Card className="my-3" body>
                                     <CardText style={{textAlign:"center"}}>
-                                        We need 24 hours to do approval process.
+                                        <b>Your Store has been set</b>
+                                        <br></br>
+                                        But we need 24 hours to do approval process.
                                         <br></br>
                                         In the mean time, your store will be displayed in the navigation-bar but can not be accessed due to inactive state.
                                         <br></br>

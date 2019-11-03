@@ -49,7 +49,7 @@ class App extends Component {
                     <Route path="/Addproduct" component={Addproduct} />
                     <Route path="/Listproduct" component={Listproduct} />
                     <Route path="/Markdown" component={Markdown} />
-                    <Route path="/Productdetail" component={Productdetail} />
+                    <Route path="/Productdetail/:id" component={Productdetail} />
                 </BrowserRouter>
             )
         } else {

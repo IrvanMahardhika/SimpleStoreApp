@@ -16,7 +16,7 @@ class CarouselHomeNewProducts extends Component {
     state = {
         newProductList: [],
         activeItemIndex: 0,
-        chevronWidth: 40,
+        chevronWidth: 30,
         gotoProductDetail: false
     }
 
@@ -119,7 +119,7 @@ class CarouselHomeNewProducts extends Component {
                         // requestToChangeActive={}
                         activeItemIndex={this.state.activeItemIndex}
                         numberOfCards={8}
-                        gutter={20}
+                        gutter={0}
                         leftChevron={<button onClick={() => this.setActiveItemIndex(1)} >{'<'}</button>}
                         rightChevron={<button onClick={() => this.setActiveItemIndex(2)} >{'>'}</button>}
                         outsideChevron

@@ -1,4 +1,4 @@
-import React,{Component} from "react";
+import React, { Component } from "react";
 import {
     Navbar,
     NavbarBrand,
@@ -7,39 +7,40 @@ import {
     NavLink,
     UncontrolledDropdown,
     DropdownToggle,
-    DropdownMenu, 
+    DropdownMenu,
     DropdownItem, UncontrolledPopover, PopoverHeader, PopoverBody,
-    InputGroup, InputGroupAddon, Input, Button, FormGroup, Label, ListGroup, ListGroupItem, Badge } from 'reactstrap';
-import {connect} from "react-redux";
-import {login,logout} from "../action/index";
+    InputGroup, InputGroupAddon, Input, Button, FormGroup, Label, ListGroup, ListGroupItem, Badge
+} from 'reactstrap';
+import { connect } from "react-redux";
+import { login, logout } from "../action/index";
 
 
 class Header extends Component {
-    
+
     state = {
-        keyword : "",
-        password : "",
-        rememberMe : false,
-        username : "",
-        renderpic : "images/userpics/nopic.png",
-        nextproductId : ""
+        keyword: "",
+        password: "",
+        rememberMe: false,
+        username: "",
+        renderpic: "images/userpics/nopic.png"
     }
 
-    componentDidMount () {
+    componentDidMount() {
         let username = JSON.parse(localStorage.getItem("rememberMe"))
         if (username) {
-            this.setState({username:username})
+            this.setState({ username: username })
         } else {
-            this.setState({username:""})
+            this.setState({ username: "" })
         }
+        this.getCart()
     }
 
-    handleClickRememberMe = ()=>{
-        if (this.state.rememberMe) {this.setState({rememberMe:false})}
-        else {this.setState({rememberMe:true})}
+    handleClickRememberMe = () => {
+        if (this.state.rememberMe) { this.setState({ rememberMe: false }) }
+        else { this.setState({ rememberMe: true }) }
     }
 
-    loginClick = ()=>{
+    loginClick = () => {
         let keyword = this.state.keyword
         let password = this.state.password
         let rememberMe = this.state.rememberMe
@@ -47,34 +48,34 @@ class Header extends Component {
             alert("Please fill in the empty field")
         } else {
             this.props.login(keyword, password, rememberMe)
-        } 
+        }
     }
 
-    logoutClick = ()=>{
+    logoutClick = () => {
         let username = JSON.parse(localStorage.getItem("rememberMe"))
         if (username) {
-            this.setState({username:username})
+            this.setState({ username: username })
         } else {
-            this.setState({username:""})
+            this.setState({ username: "" })
         }
-        this.setState({rememberMe:false})
+        this.setState({ rememberMe: false })
         this.props.logout()
     }
 
-    renderStore = ()=>{
+    renderStore = () => {
         switch (true) {
-            case this.props.loginRedux.length>0 && this.props.loginRedux[0].storename!==null:
+            case this.props.loginRedux.length > 0 && this.props.loginRedux[0].storename !== null:
                 return (
                     <NavItem>
-                        <UncontrolledDropdown  nav>
+                        <UncontrolledDropdown nav>
                             <DropdownToggle id="Store" nav caret>
                                 {this.props.loginRedux[0].storename}
                             </DropdownToggle>
                         </UncontrolledDropdown>
-                        <UncontrolledPopover disabled={this.props.loginRedux[0].storeapproval===0} placement="bottom" trigger="legacy" target="Store">
+                        <UncontrolledPopover disabled={this.props.loginRedux[0].storeapproval === 0} placement="bottom" trigger="legacy" target="Store">
                             <PopoverHeader>
                                 <Button className="">
-                                    User Order <Badge style={{backgroundColor:"#ffc61a"}}>0</Badge>
+                                    User Order <Badge style={{ backgroundColor: "#ffc61a" }}>0</Badge>
                                 </Button>
                             </PopoverHeader>
                             <PopoverBody>
@@ -94,37 +95,48 @@ class Header extends Component {
                         </UncontrolledPopover>
                     </NavItem>
                 )
-            case this.props.loginRedux.length>0 && this.props.loginRedux[0].storename===null:
+            case this.props.loginRedux.length > 0 && this.props.loginRedux[0].storename === null:
                 return (
-                    <NavItem style={{width:"250px"}} className="text-center mr-2">
-                        <NavLink href="/Startselling"className="px-0">
+                    <NavItem style={{ width: "250px" }} className="text-center mr-2">
+                        <NavLink href="/Startselling" className="px-0">
                             <span className="small">Start Selling</span>
                         </NavLink>
                     </NavItem>
                 )
         }
-        
-
     }
 
-    render () {
+    getCart = () => {
+        let z = 0
+        let cart = JSON.parse(localStorage.getItem("cart"))
+        if (cart) {
+            this.setState({ cart: cart })
+
+            for (let i = 0; i < cart.length; i++) {
+                z += cart[i].qty
+            }
+            this.setState({ cartQty: z })
+        }
+    }
+
+    render() {
         switch (true) {
             case this.props.check === true:
                 return (
-                    <Navbar style={{backgroundColor:"#ffc61a"}} light expand id="curtain">
-                            <Nav style={{width:"100%",height:"50px"}} className="justify-content-center" navbar>
-                                <NavLink href="/">
-                                    <img src={require("./Logo.png")} style={{width:"150px"}} alt="No pic" />
-                                </NavLink>
-                            </Nav>
+                    <Navbar style={{ backgroundColor: "#ffc61a" }} light expand id="curtain">
+                        <Nav style={{ width: "100%", height: "50px" }} className="justify-content-center" navbar>
+                            <NavLink href="/">
+                                <img src={require("./Logo.png")} style={{ width: "150px" }} alt="No pic" />
+                            </NavLink>
+                        </Nav>
                     </Navbar>
                 )
-            case this.props.loginRedux.length>0:
+            case this.props.loginRedux.length > 0:
                 return (
-                    <Navbar style={{backgroundColor:"#ffc61a"}} light expand id="curtain">
-                        <Nav style={{width:"100%", height:"50px"}} navbar>
+                    <Navbar style={{ backgroundColor: "#ffc61a" }} light expand id="curtain">
+                        <Nav style={{ width: "100%", height: "50px" }} navbar>
                             <NavbarBrand href="/">
-                                    <img src={require("./Logo.png")} style={{width:"150px"}} alt="No pic" />
+                                <img src={require("./Logo.png")} style={{ width: "150px" }} alt="No pic" />
                             </NavbarBrand>
                             <UncontrolledDropdown nav>
                                 <DropdownToggle nav caret>
@@ -139,20 +151,21 @@ class Header extends Component {
                                 </DropdownMenu>
                             </UncontrolledDropdown>
                             <InputGroup>
-                                <Input placeholder="search product" className="border-dark" style={{height:"40px"}}/>
-                                <InputGroupAddon addonType="append" style={{height:"40px"}}>
+                                <Input placeholder="search product" className="border-dark" style={{ height: "40px" }} />
+                                <InputGroupAddon addonType="append" style={{ height: "40px" }}>
                                     <Button id="buttonImg" className="">
                                         <img src={require('./magnifier.png')} id="imgNav" alt="No pic" />
                                     </Button>
                                 </InputGroupAddon>
                             </InputGroup>
                             <NavItem className="mx-1">
-                                <Button id="buttonImg">
+                                <Button href="/Cart" className="px-0 bg-white" id="buttonImg">
                                     <img src={require('./cart.png')} id="imgNav" alt="No pic" />
+                                    <Badge style={{ backgroundColor: "#ffc61a", color: "grey" }} >{this.props.cartQtyRedux}</Badge>
                                 </Button>
                             </NavItem>
                             {this.renderStore()}
-                            <UncontrolledDropdown  nav>
+                            <UncontrolledDropdown nav>
                                 <DropdownToggle id="User" nav caret>
                                     {this.props.loginRedux[0].username}
                                 </DropdownToggle>
@@ -162,11 +175,11 @@ class Header extends Component {
                                     <div className="row">
                                         <div className="col-4">
                                             {
-                                                this.props.loginRedux[0].userpic===null
-                                                ?
-                                                <img className="rounded-circle" src={"http://localhost:5555/"+this.state.renderpic} alt="No pic" style={{width:"50px",height:"50px",objectFit:"cover"}} />
-                                                :
-                                                <img className="rounded-circle" src={"http://localhost:5555/"+this.props.loginRedux[0].userpic} alt="No pic" style={{width:"50px",height:"50px",objectFit:"cover"}} />  
+                                                this.props.loginRedux[0].userpic === null
+                                                    ?
+                                                    <img className="rounded-circle" src={"http://localhost:5555/" + this.state.renderpic} alt="No pic" style={{ width: "50px", height: "50px", objectFit: "cover" }} />
+                                                    :
+                                                    <img className="rounded-circle" src={"http://localhost:5555/" + this.props.loginRedux[0].userpic} alt="No pic" style={{ width: "50px", height: "50px", objectFit: "cover" }} />
                                             }
                                         </div>
                                         <div className="col-8 mt-2">
@@ -181,7 +194,7 @@ class Header extends Component {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>    
+                                    </div>
                                 </PopoverHeader>
                                 <PopoverBody>
                                     <div>
@@ -199,7 +212,7 @@ class Header extends Component {
                                             <a href="/">Wishlist</a>
                                         </div>
                                     </div>
-                                    <Button className="btn-block mt-3" onClick={()=>{this.logoutClick()}} >
+                                    <Button className="btn-block mt-3" onClick={() => { this.logoutClick() }} >
                                         Logout
                                     </Button>
                                 </PopoverBody>
@@ -209,10 +222,10 @@ class Header extends Component {
                 )
             default:
                 return (
-                    <Navbar style={{backgroundColor:"#ffc61a"}} light expand id="curtain">
-                        <Nav style={{width:"100%", height:"50px"}} navbar>
+                    <Navbar style={{ backgroundColor: "#ffc61a" }} light expand id="curtain">
+                        <Nav style={{ width: "100%", height: "50px" }} navbar>
                             <NavbarBrand href="/">
-                                    <img src={require("./Logo.png")} style={{width:"150px"}} alt="No pic" />
+                                <img src={require("./Logo.png")} style={{ width: "150px" }} alt="No pic" />
                             </NavbarBrand>
                             <UncontrolledDropdown nav>
                                 <DropdownToggle nav caret>
@@ -227,22 +240,22 @@ class Header extends Component {
                                 </DropdownMenu>
                             </UncontrolledDropdown>
                             <InputGroup>
-                                <Input placeholder="search product" className="border-dark" style={{height:"40px"}}/>
-                                <InputGroupAddon addonType="append" style={{height:"40px"}}>
+                                <Input placeholder="search product" className="border-dark" style={{ height: "40px" }} />
+                                <InputGroupAddon addonType="append" style={{ height: "40px" }}>
                                     <Button id="buttonImg" className="">
                                         <img src={require('./magnifier.png')} id="imgNav" alt="No pic" />
                                     </Button>
                                 </InputGroupAddon>
                             </InputGroup>
-                            <UncontrolledDropdown  nav>
+                            <UncontrolledDropdown nav>
                                 <DropdownToggle id="TransactionStatus" nav caret>
                                     <span className="small">Transaction Status</span>
                                 </DropdownToggle>
                             </UncontrolledDropdown>
                             <UncontrolledPopover placement="bottom" trigger="legacy" target="TransactionStatus">
                                 <PopoverBody>
-                                    <Input placeholder="Buyer code" className="my-3"/>
-                                    <Input placeholder="Transaction code" className="my-3"/>
+                                    <Input placeholder="Buyer code" className="my-3" />
+                                    <Input placeholder="Transaction code" className="my-3" />
                                     <Button href="/transactionstatus" className="btn-block my-3">
                                         Status
                                     </Button>
@@ -250,17 +263,18 @@ class Header extends Component {
                                     <p>Only for purchasing without login</p>
                                 </PopoverBody>
                             </UncontrolledPopover>
-                            <NavItem style={{width:"250px"}} className="text-center mr-2">
-                                <NavLink href="/Startselling"className="px-0">
+                            <NavItem style={{ width: "250px" }} className="text-center mr-2">
+                                <NavLink href="/Startselling" className="px-0">
                                     <span className="small">Start Selling</span>
                                 </NavLink>
                             </NavItem>
                             <NavItem className="">
-                                <Button id="buttonImg">
+                                <Button href="/Cart" className="px-0 bg-white" style={{ width: "75px" }} id="buttonImg">
                                     <img src={require('./cart.png')} id="imgNav" alt="No pic" />
+                                    <Badge style={{ backgroundColor: "#ffc61a", color: "grey" }} >{this.props.cartQtyRedux}</Badge>
                                 </Button>
                             </NavItem>
-                            <UncontrolledDropdown  nav>
+                            <UncontrolledDropdown nav>
                                 <DropdownToggle id="Login" nav caret>
                                     Login
                                 </DropdownToggle>
@@ -277,22 +291,22 @@ class Header extends Component {
                                     </div>
                                 </PopoverHeader>
                                 <PopoverBody>
-                                    <Input list="username" autoFocus placeholder="Username/e-mail/cellphone" className="my-3" onChange={(e)=>{this.setState({keyword:e.target.value})}} />
+                                    <Input list="username" autoFocus placeholder="Username/e-mail/cellphone" className="my-3" onChange={(e) => { this.setState({ keyword: e.target.value }) }} />
                                     {
                                         this.state.username
-                                        ?
-                                        <datalist id="username">
-                                            <option>{this.state.username}</option>
-                                        </datalist>
-                                        :
-                                        null
+                                            ?
+                                            <datalist id="username">
+                                                <option>{this.state.username}</option>
+                                            </datalist>
+                                            :
+                                            null
                                     }
-                                    <Input placeholder="Password" type="password" className="" onChange={(e)=>{this.setState({password:e.target.value})}} />
+                                    <Input placeholder="Password" type="password" className="" onChange={(e) => { this.setState({ password: e.target.value }) }} />
                                     <div className="row">
                                         <div className="col-6 text-muted">
                                             <FormGroup check>
                                                 <Label check>
-                                                    <Input type="checkbox" onClick={()=>{this.handleClickRememberMe()}} />
+                                                    <Input type="checkbox" onClick={() => { this.handleClickRememberMe() }} />
                                                     Remember me
                                                 </Label>
                                             </FormGroup>
@@ -303,7 +317,7 @@ class Header extends Component {
                                             </span>
                                         </div>
                                     </div>
-                                    <Button className="btn-block mt-3" onClick={()=>{this.loginClick()}} >
+                                    <Button className="btn-block mt-3" onClick={() => { this.loginClick() }} >
                                         Login
                                     </Button>
                                     <hr></hr>
@@ -336,15 +350,16 @@ class Header extends Component {
                     </Navbar>
                 )
         }
-    }  
+    }
 }
 
 const mapStateToProps = state => {
     return {
-        check : state.check.check,
-        loginRedux : state.login.user
+        check: state.check.check,
+        loginRedux: state.login.user,
+        cartQtyRedux: state.cart.cartQty
     }
 }
 
 
-export default connect(mapStateToProps,{login,logout})(Header)
+export default connect(mapStateToProps, { login, logout })(Header)

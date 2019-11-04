@@ -1,47 +1,61 @@
-import {combineReducers} from "redux";
+import { combineReducers } from "redux";
 
 const init = {
-    check : false,
-    register : "",
-    location : [],
-    user : []
+    check: false,
+    register: "",
+    location: [],
+    user: [],
+    cart: [],
+    cartQty: 0
+
 }
 
-const checkReducer = (state=init,action)=>{
+const checkReducer = (state = init, action) => {
     switch (action.type) {
         case "CHANGE_HEADER":
-            return {...state, check : true}
+            return { ...state, check: true }
         case "HEADER_SEARCH_BOX":
-            return {...state, check : false}
+            return { ...state, check: false }
         default:
             return state
     }
 }
 
-const loginReducer = (state=init,action)=>{
+const loginReducer = (state = init, action) => {
     switch (action.type) {
         case "LOGIN_SUCCESS":
-            return {...state, user : action.payload}
+            return { ...state, user: action.payload }
         case "LOGOUT_SUCCESS":
-            return {...state, user : []}
+            return { ...state, user: [] }
         default:
             return state
     }
 }
 
-const registerReducer = (state=init,action)=>{
+const registerReducer = (state = init, action) => {
     switch (action.type) {
         case "REGISTER_SUCCESS":
-            return {...state, register : "success"}
+            return { ...state, register: "success" }
         default:
             return state
     }
 }
 
-const locationReducer = (state=init,action)=>{
+const locationReducer = (state = init, action) => {
     switch (action.type) {
         case "GET_LOCATION_SUCCESS":
-            return {...state, location : action.payload}
+            return { ...state, location: action.payload }
+        default:
+            return state
+    }
+}
+
+const cartReducer = (state = init, action) => {
+    switch (action.type) {
+        case "GET_CART":
+            return { ...state, cart: action.payload.cart, cartQty: action.payload.cartQty }
+        case "EMPTY_CART":
+            return { ...state, cart: [], cartQty: 0 }
         default:
             return state
     }
@@ -49,10 +63,11 @@ const locationReducer = (state=init,action)=>{
 
 const reducers = combineReducers(
     {
-        check : checkReducer,
-        login : loginReducer,
-        register : registerReducer,
-        location : locationReducer
+        check: checkReducer,
+        login: loginReducer,
+        register: registerReducer,
+        location: locationReducer,
+        cart: cartReducer
     }
 )
 

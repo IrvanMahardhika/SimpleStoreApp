@@ -15,77 +15,214 @@ class Cart extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            modal : false,
-            productBrand : "",
-            productName : "",
-            productColor : "",
-            productWeight : "",
-            productDimension : "",
-            productDescription : ""
+            modal: false,
+            productBrand: "",
+            productName: "",
+            productNote: "",
+            grandTotal: 0,
+            productId: false
         };
         this.toggle = this.toggle.bind(this);
     }
 
     toggle() {
         this.setState(prevState => ({
-          modal: !prevState.modal
+            modal: !prevState.modal
         }));
     }
 
-    emptyCartClick = () => {
-        this.props.emptyCart()
+    componentDidMount() {
+        this.getTotalPrice(this.props.cartRedux)
     }
 
-    renderModal = ()=>{
+    emptyCartClick = () => {
+        let cart = JSON.parse(localStorage.getItem("cart"))
+        let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
+        switch (true) {
+            case cartLogin !== null:
+                for (let i = 0; i < this.props.cartRedux.length; i++) {
+                    axios.delete("http://localhost:5555/tran/deletecart/" + this.props.cartRedux[i].cartId)
+                        .then()
+                        .catch()
+                }
+                this.props.emptyCart("cartLogin")
+                break;
+            case cart !== null:
+                this.props.emptyCart("cart")
+                break;
+            default:
+                break;
+        }
+    }
+
+    removeItem = (productId) => {
+        let y = this.props.cartRedux.filter(val => val.productId !== productId)
+        localStorage.setItem(
+            "cart",
+            JSON.stringify(y)
+        )
+        this.props.getCart(y)
+        this.getTotalPrice(y)
+    }
+
+    getTotalPrice = (array) => {
+        let z = 0
+        for (let i = 0; i < array.length; i++) {
+            switch (true) {
+                case array[i].discpercent !== null:
+                    z += (array[i].price * (100 - array[i].discpercent) / 100) * array[i].qty
+                    break;
+                case array[i].discvalue !== null:
+                    z += (array[i].price - array[i].discvalue) * array[i].qty
+                    break;
+                default:
+                    z += array[i].qty * array[i].price
+                    break;
+            }
+        }
+        this.setState({ grandTotal: z })
+    }
+
+    changeQty = (type, index) => {
+        let y = this.props.cartRedux
+        if (type === "minus") { y[index].qty -= 1 }
+        if (type === "plus") { y[index].qty += 1 }
+        this.props.getCart(y)
+        this.getTotalPrice(y)
+    }
+
+
+    gotoProductDetail = (val) => {
+        this.setState({ productId: val })
+    }
+
+    renderModal = () => {
         return (
             <Modal isOpen={this.state.modal}>
-                <ModalHeader style={{backgroundColor:"#ffc61a"}}>Description of {this.state.productBrand} {this.state.productName}</ModalHeader>
+                <ModalHeader style={{ backgroundColor: "#ffc61a" }}>Note for {this.state.productBrand} {this.state.productName}</ModalHeader>
                 <ModalBody>
                     <p className="text-justify">
-                        Color : {this.state.productColor}
+                        Note for Seller :
                         <br></br>
-                        <br></br>
-                        Weight : {this.state.productWeight} kg/each
-                        <br></br>
-                        <br></br>
-                        Dimension : {this.state.productDimension} cm
-                        <br></br>
-                        <br></br>
-                        Description :
-                        <br></br>
-                        {this.state.productDescription}
+                        {this.state.productNote}
                     </p>
                 </ModalBody>
                 <ModalFooter>
-                    <Button size="sm" color="secondary" onClick={()=>{this.toggle()}} >Close</Button>
+                    <Button size="sm" color="secondary" onClick={() => { this.toggle() }} >Close</Button>
                 </ModalFooter>
             </Modal>
         )
     }
 
     renderCart = () => {
-        let map = this.props.cartRedux.map((val,index)=>{
+        let map = this.props.cartRedux.map((val, index) => {
             return (
                 <tr>
-                    <td className="p-2 text-center align-text-top" >{index+1}</td>
+                    <td className="p-2 text-center align-text-top" >{index + 1}</td>
                     <td className="p-2 text-center align-text-top" >{val.category}</td>
                     <td className="p-2 text-center align-text-top" >{val.brand}</td>
-                    <td className="p-2 text-center align-text-top" >{val.name}</td>
+                    <td id="pointlink" className="p-2 text-center align-text-top" onClick={() => this.gotoProductDetail(val.productId)} >{val.name}</td>
                     <td className="p-2 text-center " >
-                        <Button size="sm" color="secondary" onClick={()=>{this.setState({modal:true,productBrand:val.brand,productName:val.name,productColor:val.color,productWeight:val.weight,productDimension:val.dimension,productDescription:val.description})}} >Show</Button>
+                        <Button size="sm" color="secondary" onClick={() => { this.setState({ modal: true, productBrand: val.brand, productName: val.name, productNote: val.note }) }} >Show</Button>
+                    </td>
+                    <td id="pointer" className="p-2 text-center " onClick={() => this.gotoProductDetail(val.productId)} >
+                        <img src={"http://localhost:5555/" + val.pic} style={{ height: "50px", width: "50px", objectFit: "cover" }} alt="No pic" />
                     </td>
                     <td className="p-2 text-center align-text-top" >
-                        <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat displayType={'text'} value={val.price} thousandSeparator={true} />
                     </td>
-                    <td className="p-2 text-center " >
-                        <img src={"http://localhost:5555/"+val.pic} style={{height:"50px",width:"50px",objectFit:"cover"}} alt="No pic" />
+                    {
+                        val.discvalue === null && val.discpercent === null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+
+                            </td>
+                            :
+                            null
+                    }
+                    {
+                        val.discpercent !== null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+                                <NumberFormat displayType={'text'} suffix="%" value={val.discpercent} />
+                            </td>
+                            :
+                            null
+                    }
+                    {
+                        val.discvalue !== null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+                                <NumberFormat displayType={'text'} value={val.discvalue} thousandSeparator={true} />
+                            </td>
+                            :
+                            null
+                    }
+                    {
+                        val.discvalue === null && val.discpercent === null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+
+                            </td>
+                            :
+                            null
+                    }
+                    {
+                        val.discpercent !== null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+                                <NumberFormat displayType={'text'} value={val.price * (100 - val.discpercent) / 100} thousandSeparator={true} />
+                            </td>
+                            :
+                            null
+                    }
+                    {
+                        val.discvalue !== null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+                                <NumberFormat displayType={'text'} value={val.price - val.discvalue} thousandSeparator={true} />
+                            </td>
+                            :
+                            null
+                    }
+                    <td className="p-2 text-center align-text-top" >
+                        <Button size="sm" className="mr-2" onClick={() => this.changeQty("minus", index)} >
+                            -
+                        </Button>
+                        {val.qty}
+                        <Button size="sm" className="ml-2" onClick={() => this.changeQty("plus", index)} >
+                            +
+                        </Button>
                     </td>
-                    <td className="p-2 text-center align-text-top" >{val.qty}</td>
-                    <td className="p-2 text-center align-text-top text-success" >
-                        <NumberFormat value={val.price*val.qty} displayType={'text'} thousandSeparator={true} />
-                    </td>
-                    <td className="p-2 text-center " >
-                        <Button size="sm" color="secondary" >Delete</Button>
+                    {
+                        val.discvalue === null && val.discpercent === null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+                                <NumberFormat value={val.price * val.qty} displayType={'text'} thousandSeparator={true} />
+                            </td>
+                            :
+                            null
+                    }
+                    {
+                        val.discpercent !== null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+                                <NumberFormat displayType={'text'} value={(val.price * (100 - val.discpercent) / 100) * val.qty} thousandSeparator={true} />
+                            </td>
+                            :
+                            null
+                    }
+                    {
+                        val.discvalue !== null
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+                                <NumberFormat displayType={'text'} value={(val.price - val.discvalue) * val.qty} thousandSeparator={true} />
+                            </td>
+                            :
+                            null
+                    }
+                    <td className="p-2 text-center align-text-top" >
+                        <Button size="sm" color="secondary" onClick={() => this.removeItem(val.productId)} >Delete</Button>
                     </td>
                 </tr>
             )
@@ -96,27 +233,36 @@ class Cart extends Component {
     render() {
         console.log(this.props.cartRedux);
         switch (true) {
-            case this.props.cartRedux.length > 0:
+            case this.props.cartRedux.length > 0 && !this.state.productId:
                 return (
                     <div className="mt-3" id="curtain" style={{ marginLeft: "100px" }} >
-                        <h1 >Cart</h1>
+                        <h1 >Your Cart</h1>
                         {this.renderModal()}
-                        <table className="table-bordered" style={{ width: "1000px" }} >
+                        <table className="table-bordered mb-2" style={{ width: "1350px" }} >
                             <thead style={{ backgroundColor: "#ffc61a" }} className="font-weight-bold">
                                 <td></td>
                                 <td className="p-2 text-center align-text-top" >Category</td>
                                 <td className="p-2 text-center align-text-top" >Brand</td>
                                 <td className="p-2 text-center align-text-top" >Name</td>
-                                <td className="p-2 text-center align-text-top" >Desc</td>
-                                <td className="p-2 text-center align-text-top" >Price (IDR)</td>
+                                <td className="p-2 text-center align-text-top" >Note</td>
                                 <td className="p-2 text-center align-text-top" >Pic</td>
+                                <td className="p-2 text-center align-text-top" >Price</td>
+                                <td className="p-2 text-center align-text-top" >Disc</td>
+                                <td className="p-2 text-center align-text-top" >Price After Disc</td>
                                 <td className="p-2 text-center align-text-top" >Qty</td>
                                 <td className="p-2 text-center align-text-top" >Total Price</td>
                                 <td className="p-2 text-center align-text-top" ></td>
                             </thead>
                             <tbody>
                                 {this.renderCart()}
-
+                                <tr >
+                                    <td colSpan="9" className="text-right font-weight-bold p-2" >
+                                        Grand Total
+                                    </td>
+                                    <td colSpan="3" className="font-weight-bold p-2" >
+                                        <NumberFormat prefix="IDR " displayType={'text'} value={this.state.grandTotal} thousandSeparator={true} />
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                         <Button onClick={() => this.emptyCartClick()} >
@@ -124,7 +270,10 @@ class Cart extends Component {
                         </Button>
                     </div>
                 )
+            case this.props.cartRedux.length > 0:
+                return <Redirect to={`/Productdetail/${this.state.productId}`} />
             default:
+                alert("your cart is empty")
                 return <Redirect to="/" />
         }
     }

@@ -1,245 +1,303 @@
 import axios from "axios";
 
-export const headerChange = ()=>{
+export const headerChange = () => {
     return {
-        type : "CHANGE_HEADER"
+        type: "CHANGE_HEADER"
     }
 }
 
-export const headerSearchbox = ()=>{
+export const headerSearchbox = () => {
     return {
-        type : "HEADER_SEARCH_BOX"
+        type: "HEADER_SEARCH_BOX"
     }
 }
 
-export const login = (keyword, password, rememberMe)=>{
+export const login = (keyword, password, rememberMe) => {
     return (dispatch) => {
         axios.get("http://localhost:5555/auth/getlogin", {
-            params : {
-                username : keyword,
-                email : keyword,
-                cellphone : keyword,
-                password : password
+            params: {
+                username: keyword,
+                email: keyword,
+                cellphone: keyword,
+                password: password
             }
         })
-        .then(res=>{   
-            if (res.data.length===0) {
-                alert("User not found")
-            } else if (res.data.length>0 && rememberMe===true) {
-                alert("Login success.");
-                localStorage.setItem(
-                    "userData",
-                    JSON.stringify(res.data)
-                );
-                localStorage.setItem(
-                    "rememberMe",
-                    JSON.stringify(res.data[0].username)
-                );
-                dispatch(
-                    {
-                        type : "LOGIN_SUCCESS",
-                        payload : res.data
-                    }
-                )
-            } else if (res.data.length>0 && rememberMe===false) {
-                alert("Login Success.");
-                localStorage.setItem(
-                    "userData",
-                    JSON.stringify(res.data)
-                );
-                localStorage.removeItem("rememberMe");
-                dispatch(
-                    {
-                        type : "LOGIN_SUCCESS",
-                        payload : res.data
-                    }
-                )
-            }
-            axios.post("http://localhost:5555/auth/gettoken",{
-                username : res.data[0].username
+            .then(res => {
+                let z = ""
+                if (res.data.length === 0) {
+                    alert("User not found")
+                } else if (res.data.length > 0 && rememberMe === true) {
+                    z = res.data[0].userId
+                    alert("Login success.");
+                    localStorage.setItem(
+                        "userData",
+                        JSON.stringify(res.data)
+                    );
+                    localStorage.setItem(
+                        "rememberMe",
+                        JSON.stringify(res.data[0].username)
+                    );
+                    dispatch(
+                        {
+                            type: "LOGIN_SUCCESS",
+                            payload: res.data
+                        }
+                    )
+                } else if (res.data.length > 0 && rememberMe === false) {
+                    z = res.data[0].userId
+                    alert("Login Success.");
+                    localStorage.setItem(
+                        "userData",
+                        JSON.stringify(res.data)
+                    );
+                    localStorage.removeItem("rememberMe");
+                    dispatch(
+                        {
+                            type: "LOGIN_SUCCESS",
+                            payload: res.data
+                        }
+                    )
+                }
+                axios.post("http://localhost:5555/auth/gettoken", {
+                    username: res.data[0].username
+                })
+                    .then(res => {
+                        localStorage.setItem("token", res.data.token);
+                        axios.get("http://localhost:5555/tran/getcart", {
+                            params: {
+                                userId: z
+                            },
+                            headers: {
+                                authorization: res.data.token
+                            }
+                        })
+                            .then(res => {
+                                if (res.data.length > 0) {
+                                    localStorage.setItem(
+                                        "cartLogin",
+                                        JSON.stringify(res.data)
+                                    )
+                                    let z = 0
+                                    for (let i = 0; i < res.data.length; i++) {
+                                        z += parseInt(res.data[i].qty)
+                                    }
+                                    dispatch(
+                                        {
+                                            type: "GET_CART",
+                                            payload: {
+                                                cart: res.data,
+                                                cartQty: z
+                                            }
+                                        }
+                                    )
+                                }
+                            })
+                            .catch()
+                    }).catch()
             })
-            .then(res=>{
-                localStorage.setItem("token",res.data.token);
-            }).catch()
-        })
-        .catch()
+            .catch()
     }
 }
 
-export const keepLogin = (val)=>{
+export const keepLogin = (val) => {
     return {
-        type : "LOGIN_SUCCESS",
-        payload : val
+        type: "LOGIN_SUCCESS",
+        payload: val
     }
 }
 
-export const logout = ()=>{
-    localStorage.removeItem("userData");
-    localStorage.removeItem("token");
-    localStorage.removeItem("setproductId");
-    alert("Logout Success.");
-    return {
-        type : "LOGOUT_SUCCESS"
+export const logout = () => {
+    return (dispatch) => {
+        localStorage.removeItem("userData");
+        localStorage.removeItem("token");
+        localStorage.removeItem("setproductId");
+        localStorage.removeItem("cartLogin");
+        dispatch(
+            {
+                type: "LOGOUT_SUCCESS"
+            }
+        )
+        dispatch(
+            {
+                type: "EMPTY_CART"
+            }
+        )
+        alert("Logout Success.");
+        let cart = JSON.parse(localStorage.getItem("cart"))
+        if (cart) {
+            let z = 0
+            for (let i = 0; i < cart.length; i++) {
+                z += parseInt(cart[i].qty)
+            }
+            dispatch(
+                {
+                    type: "GET_CART",
+                    payload: {
+                        cart: cart,
+                        cartQty: z
+                    }
+                }
+            )
+        }
     }
 }
 
-export const addUser = (val)=>{
+export const addUser = (val) => {
     return (dispatch) => {
         axios.get("http://localhost:5555/auth/checkuser", {
-            params : {
-                username : val.username,
-                email : val.email,
-                cellphone : val.cellphone
+            params: {
+                username: val.username,
+                email: val.email,
+                cellphone: val.cellphone
             }
         })
-        .then(res=>{
-            if (res.data.length>0) {
-                switch (true) {
-                    case res.data[0].username.toLowerCase() === val.username.toLowerCase():
-                        alert("That username has been taken.")
-                        break
-                    case res.data[0].email.toLowerCase() === val.email.toLowerCase():
-                        alert("That email has been used.")
-                        break
-                    case res.data[0].cellphone === val.cellphone:
-                        alert("That cellphone number has been registered.")
-                        break
-                    default:
-                        break
-                }
-            } else {
-                axios.post("http://localhost:5555/auth/addUser",
-                    {
-                        fullname : val.fullname,
-                        cellphone : val.cellphone,
-                        email : val.email,
-                        gender : val.gender,
-                        username : val.username,
-                        password : val.retype_password
+            .then(res => {
+                if (res.data.length > 0) {
+                    switch (true) {
+                        case res.data[0].username.toLowerCase() === val.username.toLowerCase():
+                            alert("That username has been taken.")
+                            break
+                        case res.data[0].email.toLowerCase() === val.email.toLowerCase():
+                            alert("That email has been used.")
+                            break
+                        case res.data[0].cellphone === val.cellphone:
+                            alert("That cellphone number has been registered.")
+                            break
+                        default:
+                            break
                     }
-                )
-                .then(res=>{
-                    alert("Register success.\nPlease verify your email, by clicking the link we have sent.");
-                    axios.get("http://localhost:5555/mail/sendverifyemail", {
-                        params : {
-                            email : val.email,
-                            gender : val.gender,
-                            fullname : val.fullname,
-                            username : val.username
+                } else {
+                    axios.post("http://localhost:5555/auth/addUser",
+                        {
+                            fullname: val.fullname,
+                            cellphone: val.cellphone,
+                            email: val.email,
+                            gender: val.gender,
+                            username: val.username,
+                            password: val.retype_password
+                        }
+                    )
+                        .then(res => {
+                            alert("Register success.\nPlease verify your email, by clicking the link we have sent.");
+                            axios.get("http://localhost:5555/mail/sendverifyemail", {
+                                params: {
+                                    email: val.email,
+                                    gender: val.gender,
+                                    fullname: val.fullname,
+                                    username: val.username
+                                }
+                            }).then().catch();
+                            dispatch(
+                                {
+                                    type: "REGISTER_SUCCESS"
+                                }
+                            )
+                        })
+                        .catch()
+                }
+            })
+            .catch()
+    }
+}
+
+export const sendLinkChangePasswordEmail = (val) => {
+    return (dispatch) => {
+        axios.get("http://localhost:5555/auth/getuserbyemail", {
+            params: {
+                email: val
+            }
+        })
+            .then(res => {
+                if (res.data.length === 0) {
+                    alert("E-mail not found")
+                } else {
+                    alert("A link to reset you password, has been sent to your email.");
+                    axios.get("http://localhost:5555/mail/sendlinkchangepasswordemail", {
+                        params: {
+                            email: res.data[0].email,
+                            gender: res.data[0].gender,
+                            fullname: res.data[0].fullname,
+                            userId: res.data[0].userId
                         }
                     }).then().catch();
                     dispatch(
                         {
-                            type : "REGISTER_SUCCESS"
+                            type: "REGISTER_SUCCESS"
                         }
                     )
-                })
-                .catch()
-            }
-        })
-        .catch()
-    }
-}
-
-export const sendLinkChangePasswordEmail = (val)=>{
-    return (dispatch) => {
-        axios.get("http://localhost:5555/auth/getuserbyemail", {
-            params : {
-                email : val
-            }
-        })
-        .then(res=>{
-            if (res.data.length===0) {
-                alert("E-mail not found")
-            } else {
-                alert("A link to reset you password, has been sent to your email.");
-                axios.get("http://localhost:5555/mail/sendlinkchangepasswordemail", {
-                    params : {
-                        email : res.data[0].email,
-                        gender : res.data[0].gender,
-                        fullname : res.data[0].fullname,
-                        userId : res.data[0].userId
-                    }
-                }).then().catch();
-                dispatch(
-                    {
-                        type : "REGISTER_SUCCESS"
-                    }
-                )
-            }
-        })
-        .catch()
+                }
+            })
+            .catch()
     }
 }
 
 
-export const changePassword = (val)=>{
+export const changePassword = (val) => {
     return (dispatch) => {
         axios.put("http://localhost:5555/auth/changePassword",
             {
-                userId : val.userId,
-                username : val.username,
-                password : val.retype_password
+                userId: val.userId,
+                username: val.username,
+                password: val.retype_password
             }
         )
-        .then(res=>{
-            console.log(res.data.changedRows);
-            
-            if (res.data.changedRows===0) {
-                alert("Wrong username")
-            } else {
-                alert("Your password has been changed.\nPlease try to login using your new password.");
-                dispatch(
-                    {
-                        type : "REGISTER_SUCCESS"
-                    }
-                )
-            }
-            
-        })
-        .catch()    
+            .then(res => {
+                console.log(res.data.changedRows);
+
+                if (res.data.changedRows === 0) {
+                    alert("Wrong username")
+                } else {
+                    alert("Your password has been changed.\nPlease try to login using your new password.");
+                    dispatch(
+                        {
+                            type: "REGISTER_SUCCESS"
+                        }
+                    )
+                }
+            })
+            .catch()
     }
 }
 
-export const sendVerifyEmail = (val)=>{
+export const sendVerifyEmail = (val) => {
     return (dispatch) => {
         alert("Verification link has been sent to your e-mail.");
         axios.get("http://localhost:5555/mail/sendverifyemail", {
-            params : {
-                email : val.email,
-                gender : val.gender,
-                fullname : val.fullname,
-                username : val.username
+            params: {
+                email: val.email,
+                gender: val.gender,
+                fullname: val.fullname,
+                username: val.username
             }
         }).then().catch();
-    } 
+    }
 }
 
-export const getData = ()=>{
+export const getData = () => {
     let storage = JSON.parse(localStorage.getItem("userData"))
     let token = localStorage.getItem("token")
     return (dispatch) => {
         axios.get("http://localhost:5555/auth/getdata", {
-            params : {
-                userId : storage[0].userId
+            params: {
+                userId: storage[0].userId
             },
-            headers : {
-                authorization : token
+            headers: {
+                authorization: token
             }
         })
-        .then(res=>{
-            localStorage.setItem(
-                "userData",
-                JSON.stringify(res.data)
-            );
-            dispatch(
-                {
-                    type : "LOGIN_SUCCESS",
-                    payload : res.data
-                }
-            )
-        })
-        .catch()
+            .then(res => {
+                localStorage.setItem(
+                    "userData",
+                    JSON.stringify(res.data)
+                );
+                dispatch(
+                    {
+                        type: "LOGIN_SUCCESS",
+                        payload: res.data
+                    }
+                )
+            })
+            .catch()
     }
 }
 

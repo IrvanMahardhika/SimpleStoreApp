@@ -159,7 +159,7 @@ class Header extends Component {
                                 </InputGroupAddon>
                             </InputGroup>
                             <NavItem className="mx-1">
-                                <Button href="/Cart" className="px-0 bg-white" id="buttonImg">
+                                <Button href="/Cart" className="px-0 bg-white" style={{ width: "75px" }} id="buttonImg">
                                     <img src={require('./cart.png')} id="imgNav" alt="No pic" />
                                     <Badge style={{ backgroundColor: "#ffc61a", color: "grey" }} >{this.props.cartQtyRedux}</Badge>
                                 </Button>

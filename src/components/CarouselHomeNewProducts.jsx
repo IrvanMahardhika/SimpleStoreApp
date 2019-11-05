@@ -17,7 +17,7 @@ class CarouselHomeNewProducts extends Component {
         newProductList: [],
         activeItemIndex: 0,
         chevronWidth: 30,
-        gotoProductDetail: false
+        productId: false
     }
 
     componentDidMount() {
@@ -42,7 +42,7 @@ class CarouselHomeNewProducts extends Component {
     }
 
     gotoProductDetail = (val) => {
-        this.setState({ gotoProductDetail: true, productId: val })
+        this.setState({ productId: val })
     }
 
     renderNewProduct = () => {
@@ -55,18 +55,29 @@ class CarouselHomeNewProducts extends Component {
                             ?
                             <CardImgOverlay className="p-1" >
                                 <CardTitle className="text-danger font-weight-bolder h6 text-right" >
-                                    - {val.discpercent}%
-                            </CardTitle>
+                                    <NumberFormat style={{ backgroundColor: "white" }} displayType={'text'} className="border-0" prefix="- " suffix="%" value={val.discpercent} />
+                                </CardTitle>
                             </CardImgOverlay>
                             :
                             null
                     }
                     {
-                        val.discvalue !== null
+                        val.discvalue !== null && val.discvalue<1000000
                             ?
                             <CardImgOverlay className="p-1" >
                                 <CardTitle className="text-danger font-weight-bolder h6 text-right" >
-                                    - IDR {val.discvalue}
+                                    <NumberFormat style={{ backgroundColor: "white" }} displayType={'text'} className="border-0" prefix="- IDR " suffix="K" value={val.discvalue/1000} thousandSeparator={true} />
+                                </CardTitle>
+                            </CardImgOverlay>
+                            :
+                            null
+                    }
+                    {
+                        val.discvalue !== null && val.discvalue>1000000
+                            ?
+                            <CardImgOverlay className="p-1" >
+                                <CardTitle className="text-danger font-weight-bolder h6 text-right" >
+                                    <NumberFormat style={{ backgroundColor: "white" }} displayType={'text'} className="border-0" prefix="- IDR " suffix="Mio" value={val.discvalue/1000000} thousandSeparator={true} />
                                 </CardTitle>
                             </CardImgOverlay>
                             :
@@ -112,7 +123,7 @@ class CarouselHomeNewProducts extends Component {
     }
 
     render() {
-        if (!this.state.gotoProductDetail) {
+        if (!this.state.productId) {
             return (
                 <div style={{ padding: `0 ${this.state.chevronWidth}px`, backgroundColor: "#ffc61a" }}>
                     <ItemsCarousel

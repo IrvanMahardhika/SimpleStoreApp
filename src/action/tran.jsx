@@ -14,9 +14,8 @@ export const getCart = (cart) => {
     }
 }
 
-export const emptyCart = ()=>{
-    localStorage.removeItem("cart");
-    alert("your cart is empty")
+export const emptyCart = (cart)=>{
+    localStorage.removeItem(cart);
     return {
         type : "EMPTY_CART"
     }

@@ -55,12 +55,29 @@ class Cart extends Component {
         }
     }
 
-    removeItem = (productId) => {
+    removeItem = (productId, cartId) => {
+        let cart = JSON.parse(localStorage.getItem("cart"))
+        let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
         let y = this.props.cartRedux.filter(val => val.productId !== productId)
-        localStorage.setItem(
-            "cart",
-            JSON.stringify(y)
-        )
+        switch (true) {
+            case cartLogin !== null:
+                localStorage.setItem(
+                    "cartLogin",
+                    JSON.stringify(y)
+                )
+                axios.delete("http://localhost:5555/tran/deletecart/" + cartId)
+                    .then()
+                    .catch()
+                break;
+            case cart !== null:
+                localStorage.setItem(
+                    "cart",
+                    JSON.stringify(y)
+                )
+                break;
+            default:
+                break;
+        }
         this.props.getCart(y)
         this.getTotalPrice(y)
     }
@@ -84,9 +101,32 @@ class Cart extends Component {
     }
 
     changeQty = (type, index) => {
+        let cart = JSON.parse(localStorage.getItem("cart"))
+        let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
         let y = this.props.cartRedux
         if (type === "minus") { y[index].qty -= 1 }
         if (type === "plus") { y[index].qty += 1 }
+        switch (true) {
+            case cartLogin !== null:
+                localStorage.setItem(
+                    "cartLogin",
+                    JSON.stringify(y)
+                )
+                axios.put("http://localhost:5555/tran/updatecart", {
+                    userId: y[index].userId,
+                    productId: y[index].productId,
+                    qty: y[index].qty
+                }).then().catch()
+                break;
+            case cart !== null:
+                localStorage.setItem(
+                    "cart",
+                    JSON.stringify(y)
+                )
+                break;
+            default:
+                break;
+        }
         this.props.getCart(y)
         this.getTotalPrice(y)
     }
@@ -126,7 +166,7 @@ class Cart extends Component {
                         <Button size="sm" color="secondary" onClick={() => { this.setState({ modal: true, productBrand: val.brand, productName: val.name, productNote: val.note }) }} >Show</Button>
                     </td>
                     <td id="pointer" className="p-2 text-center " onClick={() => this.gotoProductDetail(val.productId)} >
-                        <img src={"http://localhost:5555/" + val.pic} style={{ height: "50px", width: "50px", objectFit: "cover" }} alt="No pic" />
+                        <img src={"http://localhost:5555/" + val.productpic1} style={{ height: "50px", width: "50px", objectFit: "cover" }} alt="No pic" />
                     </td>
                     <td className="p-2 text-center align-text-top" >
                         <NumberFormat displayType={'text'} value={val.price} thousandSeparator={true} />
@@ -186,14 +226,15 @@ class Cart extends Component {
                             null
                     }
                     <td className="p-2 text-center align-text-top" >
-                        <Button size="sm" className="mr-2" onClick={() => this.changeQty("minus", index)} >
+                        <Button disabled={val.qty === 1} size="sm" className="mr-2" onClick={() => this.changeQty("minus", index)} >
                             -
-                        </Button>
+                    </Button>
                         {val.qty}
                         <Button size="sm" className="ml-2" onClick={() => this.changeQty("plus", index)} >
                             +
-                        </Button>
+                    </Button>
                     </td>
+
                     {
                         val.discvalue === null && val.discpercent === null
                             ?
@@ -221,9 +262,19 @@ class Cart extends Component {
                             :
                             null
                     }
-                    <td className="p-2 text-center align-text-top" >
-                        <Button size="sm" color="secondary" onClick={() => this.removeItem(val.productId)} >Delete</Button>
-                    </td>
+                    {
+                        val.cartId
+                            ?
+                            <td className="p-2 text-center align-text-top" >
+                                <Button size="sm" color="secondary" onClick={() => this.removeItem(val.productId, val.cartId)} >Delete</Button>
+                            </td>
+                            :
+                            <td className="p-2 text-center align-text-top" >
+                                <Button size="sm" color="secondary" onClick={() => this.removeItem(val.productId)} >Delete</Button>
+                            </td>
+
+                    }
+
                 </tr>
             )
         })

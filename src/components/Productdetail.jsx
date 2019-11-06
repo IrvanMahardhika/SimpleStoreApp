@@ -64,7 +64,7 @@ class Productdetail extends Component {
             name: this.state.productDetail[0].name,
             note: this.state.note,
             price: this.state.productDetail[0].price,
-            pic: this.state.productDetail[0].productpic1,
+            productpic1: this.state.productDetail[0].productpic1,
             discpercent: this.state.productDetail[0].discpercent,
             discvalue: this.state.productDetail[0].discvalue,
             qty: this.state.qty
@@ -86,8 +86,6 @@ class Productdetail extends Component {
                 }
             })
                 .then(res => {
-                    console.log(res.data);
-                    
                     if (res.data.length > 0) {
                         axios.put("http://localhost:5555/tran/updatecart", {
                             userId: this.props.loginRedux[0].userId,

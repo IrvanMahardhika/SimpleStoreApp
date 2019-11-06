@@ -28,21 +28,9 @@ class App extends Component {
 
     componentDidMount() {
         let storage = JSON.parse(localStorage.getItem("userData"))
-        let cart = JSON.parse(localStorage.getItem("cart"))
-        let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
         if (storage) {
-            if (cartLogin) {
-                this.props.keepLogin(storage)
-                this.props.getData()
-                this.props.getCart(cartLogin)
-            } else {
-                this.props.keepLogin(storage)
-                this.props.getData()
-            }
-        } else {
-            if (cart) {
-                this.props.getCart(cart)
-            }
+            this.props.keepLogin(storage)
+            this.props.getData()
         }
         this.setState({ check: true })
     }

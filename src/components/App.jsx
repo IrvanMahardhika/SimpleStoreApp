@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Route, BrowserRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { keepLogin, getData } from "../action/index"
-import { getCart } from "../action/tran"
+import { getCartLogin, getCartNonLogin } from "../action/tran"
 
 import Home from "./Home"
 import Register from "./Register"
@@ -18,6 +18,7 @@ import Listproduct from "./Listproduct"
 import Markdown from "./Markdown"
 import Productdetail from "./Productdetail"
 import Cart from "./Cart"
+import Checkout from "./Checkout"
 
 
 class App extends Component {
@@ -28,9 +29,21 @@ class App extends Component {
 
     componentDidMount() {
         let storage = JSON.parse(localStorage.getItem("userData"))
+        let cart = JSON.parse(localStorage.getItem("cart"))
+        let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
         if (storage) {
-            this.props.keepLogin(storage)
-            this.props.getData()
+            if (cartLogin) {
+                this.props.keepLogin(storage)
+                this.props.getData()
+                this.props.getCartLogin(cartLogin)
+            } else {
+                this.props.keepLogin(storage)
+                this.props.getData()
+            }
+        } else {
+            if (cart) {
+                this.props.getCartNonLogin(cart)
+            }
         }
         this.setState({ check: true })
     }
@@ -53,12 +66,18 @@ class App extends Component {
                     <Route path="/Markdown" component={Markdown} />
                     <Route path="/Productdetail/:id" component={Productdetail} />
                     <Route path="/Cart" component={Cart} />
+                    <Route path="/Checkout" component={Checkout} />
                 </BrowserRouter>
             )
         } else {
-            return <div><h1>Loading</h1></div>
+            return (
+                <div style={{backgroundColor: "#ffc61a", height:"1000px"}} className="text-center" >
+                    <img src={require("./Logo.png")} style={{ width: "1200px", height: "600px" }} alt="No pic" />
+                    <h1 >Loading .....</h1>
+                </div>
+            )
         }
     }
 }
 
-export default connect(null, { keepLogin, getData, getCart })(App)
+export default connect(null, { keepLogin, getData, getCartLogin, getCartNonLogin })(App)

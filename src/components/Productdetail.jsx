@@ -6,7 +6,7 @@ import {
     TabContent, TabPane, Nav, NavItem, NavLink, CardHeader, Input, FormGroup, FormFeedback, Badge
 } from 'reactstrap';
 import { connect } from "react-redux";
-import { getCart } from "../action/tran"
+import { getCartLogin, getCartNonLogin } from "../action/tran"
 
 class Productdetail extends Component {
 
@@ -37,7 +37,12 @@ class Productdetail extends Component {
         let z = this.state.qty
         if (val === "minus") { z -= 1 }
         if (val === "plus") { z += 1 }
-        this.setState({ qty: z })
+        if (z > this.state.productDetail[0].inventory) {
+            this.setState({ qty: 1 })
+            alert(`remaining stock is only ${this.state.productDetail[0].inventory} ${this.state.productDetail[0].measurement}`)
+        } else {
+            this.setState({ qty: z })
+        }
     }
 
     getQty = (val) => {
@@ -48,6 +53,10 @@ class Productdetail extends Component {
             case val.substr(0, 1) === "0":
                 this.setState({ qty: parseInt(val) })
                 break;
+            case val > this.state.productDetail[0].inventory:
+                this.setState({ qty: 1 })
+                alert(`remaining stock is only ${this.state.productDetail[0].inventory} ${this.state.productDetail[0].measurement}`)
+                break;
             default:
                 this.setState({ qty: val })
                 break;
@@ -57,41 +66,46 @@ class Productdetail extends Component {
     addTocart = () => {
         let token = localStorage.getItem("token")
         let y = this.props.cartRedux.filter(val => val.productId !== this.props.match.params.id)
-        let z = {
-            productId: this.props.match.params.id,
-            category: this.state.productDetail[0].category,
-            brand: this.state.productDetail[0].brand,
-            name: this.state.productDetail[0].name,
-            note: this.state.note,
-            price: this.state.productDetail[0].price,
-            productpic1: this.state.productDetail[0].productpic1,
-            discpercent: this.state.productDetail[0].discpercent,
-            discvalue: this.state.productDetail[0].discvalue,
-            qty: this.state.qty
-        }
-        y.push(z)
-
         if (this.props.loginRedux.length > 0) {
-            localStorage.setItem(
-                "cartLogin",
-                JSON.stringify(y)
-            )
             axios.get("http://localhost:5555/tran/checkcart", {
                 params: {
                     userId: this.props.loginRedux[0].userId,
                     productId: this.props.match.params.id
                 },
-                headers : {
-                    authorization : token
+                headers: {
+                    authorization: token
                 }
             })
-                .then(res => {
-                    if (res.data.length > 0) {
+                .then(pos => {
+                    if (pos.data.length > 0) {
                         axios.put("http://localhost:5555/tran/updatecart", {
                             userId: this.props.loginRedux[0].userId,
                             productId: this.props.match.params.id,
                             qty: this.state.qty
-                        }).then().catch()
+                        })
+                            .then(res => {
+                                let z = {
+                                    cartId: pos.data[0].cartId,
+                                    userId: this.props.loginRedux[0].userId,
+                                    start: this.state.productDetail[0].start,
+                                    end: this.state.productDetail[0].end,
+                                    productId: this.props.match.params.id,
+                                    category: this.state.productDetail[0].category,
+                                    brand: this.state.productDetail[0].brand,
+                                    name: this.state.productDetail[0].name,
+                                    note: this.state.note,
+                                    price: this.state.productDetail[0].price,
+                                    productpic1: this.state.productDetail[0].productpic1,
+                                    discpercent: this.state.productDetail[0].discpercent,
+                                    discvalue: this.state.productDetail[0].discvalue,
+                                    qty: this.state.qty,
+                                    inventory: this.state.productDetail[0].inventory,
+                                    measurement: this.state.productDetail[0].measurement
+                                }
+                                y.push(z)
+                                this.props.getCartLogin(y)
+                            })
+                            .catch()
                     } else {
                         axios.post("http://localhost:5555/tran/addtocart",
                             {
@@ -100,22 +114,58 @@ class Productdetail extends Component {
                                 qty: this.state.qty,
                                 note: this.state.note
                             })
-                            .then()
+                            .then(res => {
+                                let z = {
+                                    cartId: res.data.insertId,
+                                    userId: this.props.loginRedux[0].userId,
+                                    start: this.state.productDetail[0].start,
+                                    end: this.state.productDetail[0].end,
+                                    productId: this.props.match.params.id,
+                                    category: this.state.productDetail[0].category,
+                                    brand: this.state.productDetail[0].brand,
+                                    name: this.state.productDetail[0].name,
+                                    note: this.state.note,
+                                    price: this.state.productDetail[0].price,
+                                    productpic1: this.state.productDetail[0].productpic1,
+                                    discpercent: this.state.productDetail[0].discpercent,
+                                    discvalue: this.state.productDetail[0].discvalue,
+                                    qty: this.state.qty,
+                                    inventory: this.state.productDetail[0].inventory,
+                                    measurement: this.state.productDetail[0].measurement
+                                }
+                                y.push(z)
+                                this.props.getCartLogin(y)
+                            })
                             .catch()
                     }
                 })
                 .catch()
         } else {
-            localStorage.setItem(
-                "cart",
-                JSON.stringify(y)
-            )
+            let z = {
+                start: this.state.productDetail[0].start,
+                end: this.state.productDetail[0].end,
+                productId: this.props.match.params.id,
+                category: this.state.productDetail[0].category,
+                brand: this.state.productDetail[0].brand,
+                name: this.state.productDetail[0].name,
+                note: this.state.note,
+                price: this.state.productDetail[0].price,
+                productpic1: this.state.productDetail[0].productpic1,
+                discpercent: this.state.productDetail[0].discpercent,
+                discvalue: this.state.productDetail[0].discvalue,
+                qty: this.state.qty,
+                inventory: this.state.productDetail[0].inventory,
+                measurement: this.state.productDetail[0].measurement
+            }
+            y.push(z)
+            this.props.getCartNonLogin(y)
         }
         alert("Add to cart success")
-        this.props.getCart(y)
     }
 
     render() {
+        console.log(this.props.cartRedux);
+
         return (
             <div className="mt-3" id="curtain" style={{ marginLeft: "100px" }} >
                 <Row className="ml-1 mb-3" >
@@ -151,7 +201,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Price
                                                 </td>
-                                                    <td className="p-2" style={{ fontSize: "30px" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px" }} >
                                                         <NumberFormat style={{ textDecorationLine: "line-through" }} displayType={'text'} className="border-0" prefix="IDR " value={this.state.productDetail[0].price} thousandSeparator={true} />
                                                     </td>
                                                 </tr>
@@ -160,7 +210,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Price
                                                 </td>
-                                                    <td className="p-2" style={{ fontSize: "30px" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px" }} >
                                                         <NumberFormat displayType={'text'} className="border-0" prefix="IDR " value={this.state.productDetail[0].price} thousandSeparator={true} />
                                                     </td>
                                                 </tr>
@@ -172,7 +222,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Disc
                                                 </td>
-                                                    <td className="p-2" style={{ fontSize: "30px", color: "red" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px", color: "red" }} >
                                                         <NumberFormat displayType={'text'} className="border-0" prefix="- " suffix="%" value={this.state.productDetail[0].discpercent} />
                                                     </td>
                                                 </tr>
@@ -186,7 +236,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Disc
                                                 </td>
-                                                    <td className="p-2" style={{ fontSize: "30px", color: "red" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px", color: "red" }} >
                                                         <NumberFormat displayType={'text'} className="border-0" prefix="- IDR " value={this.state.productDetail[0].discvalue} thousandSeparator={true} />
                                                     </td>
                                                 </tr>
@@ -200,7 +250,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Price After Disc
                                                 </td>
-                                                    <td className="p-2" style={{ fontSize: "30px" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px" }} >
                                                         <NumberFormat displayType={'text'} className="border-0" prefix="IDR " value={this.state.productDetail[0].price * (100 - this.state.productDetail[0].discpercent) / 100} thousandSeparator={true} />
 
                                                     </td>
@@ -215,7 +265,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Price After Disc
                                                 </td>
-                                                    <td className="p-2" style={{ fontSize: "30px" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px" }} >
                                                         <NumberFormat displayType={'text'} className="border-0" prefix="IDR " value={this.state.productDetail[0].price - this.state.productDetail[0].discvalue} thousandSeparator={true} />
 
                                                     </td>
@@ -225,12 +275,21 @@ class Productdetail extends Component {
                                         }
                                         <tr >
                                             <td className="p-2" >
-                                                Qty
+                                                Remaining Stock
                                             </td>
-                                            <td className="p-2" style={{ fontSize: "30px" }} >
-                                                <Button disabled={this.state.qty === 1} onClick={() => this.changeQty("minus")} >-</Button>
-                                                <NumberFormat maxLength="2" style={{ width: "50px" }} decimalScale="0" allowNegative={false} className="text-right mx-3" value={this.state.qty} onChange={e => this.getQty(e.target.value)} />
-                                                <Button onClick={() => this.changeQty("plus")} >+</Button>
+                                            <td className="p-2" style={{ fontSize: "20px" }} >
+                                                {this.state.productDetail[0].inventory} {this.state.productDetail[0].measurement}
+                                            </td>
+                                        </tr>
+                                        <tr >
+                                            <td className="p-2" >
+                                                Purchase Qty
+                                            </td>
+                                            <td className="p-2" style={{ fontSize: "20px" }} >
+                                                <Button className="mr-3" disabled={this.state.qty <= 1} onClick={() => this.changeQty("minus")} >-</Button>
+                                                <NumberFormat maxLength="2" style={{ width: "50px", borderRadius: "5px" }} decimalScale="0" allowNegative={false} className="text-right mr-1" value={this.state.qty} onChange={e => this.getQty(e.target.value)} />
+                                                {this.state.productDetail[0].measurement}
+                                                <Button className="ml-3" onClick={() => this.changeQty("plus")} >+</Button>
                                             </td>
                                         </tr>
                                         {
@@ -240,7 +299,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Total
                                                 </td>
-                                                    <td className="p-2" style={{ fontSize: "30px", color: "red" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px", color: "red" }} >
                                                         <NumberFormat displayType={'text'} className="border-0" prefix="IDR " value={this.state.productDetail[0].price * this.state.qty} thousandSeparator={true} />
                                                     </td>
                                                 </tr>
@@ -254,7 +313,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Total
                                                 </td>
-                                                    <td className="p-2" style={{ fontSize: "30px", color: "red" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px", color: "red" }} >
                                                         <NumberFormat displayType={'text'} className="border-0" prefix="IDR " value={(this.state.productDetail[0].price * (100 - this.state.productDetail[0].discpercent) / 100) * this.state.qty} thousandSeparator={true} />
                                                     </td>
                                                 </tr>
@@ -268,7 +327,7 @@ class Productdetail extends Component {
                                                     <td className="p-2" >
                                                         Total
                                             </td>
-                                                    <td className="p-2" style={{ fontSize: "30px", color: "red" }} >
+                                                    <td className="p-2" style={{ fontSize: "20px", color: "red" }} >
                                                         <NumberFormat displayType={'text'} className="border-0" prefix="IDR " value={(this.state.productDetail[0].price - this.state.productDetail[0].discvalue) * this.state.qty} thousandSeparator={true} />
                                                     </td>
                                                 </tr>
@@ -279,7 +338,7 @@ class Productdetail extends Component {
                                             <td className="p-2" >
                                                 Note
                                             </td>
-                                            <td className="p-2" style={{ fontSize: "30px" }} >
+                                            <td className="p-2" style={{ fontSize: "20px" }} >
                                                 <Input style={{ width: "300px", height: "100px" }} type="textarea" placeholder="exp : request for red color" onChange={e => this.setState({ note: e.target.value })} />
                                             </td>
                                         </tr>
@@ -360,4 +419,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps, { getCart })(Productdetail)
+export default connect(mapStateToProps, { getCartLogin, getCartNonLogin })(Productdetail)

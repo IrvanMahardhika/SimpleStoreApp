@@ -90,6 +90,12 @@ export const login = (keyword, password, rememberMe) => {
                                             }
                                         }
                                     )
+                                } else {
+                                    dispatch(
+                                        {
+                                            type : "EMPTY_CART"
+                                        }
+                                    )
                                 }
                             })
                             .catch()

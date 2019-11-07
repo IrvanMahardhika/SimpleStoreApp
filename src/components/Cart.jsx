@@ -8,7 +8,7 @@ import {
 } from 'reactstrap';
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
-import { getCart, emptyCart } from "../action/tran"
+import { getCartLogin, getCartNonLogin, emptyCart } from "../action/tran"
 
 class Cart extends Component {
 
@@ -20,7 +20,8 @@ class Cart extends Component {
             productName: "",
             productNote: "",
             grandTotal: 0,
-            productId: false
+            productId: false,
+            checkout: false
         };
         this.toggle = this.toggle.bind(this);
     }
@@ -61,24 +62,18 @@ class Cart extends Component {
         let y = this.props.cartRedux.filter(val => val.productId !== productId)
         switch (true) {
             case cartLogin !== null:
-                localStorage.setItem(
-                    "cartLogin",
-                    JSON.stringify(y)
-                )
+                this.props.getCartLogin(y)
                 axios.delete("http://localhost:5555/tran/deletecart/" + cartId)
                     .then()
                     .catch()
                 break;
             case cart !== null:
-                localStorage.setItem(
-                    "cart",
-                    JSON.stringify(y)
-                )
+                this.props.getCartNonLogin(y)
                 break;
             default:
                 break;
         }
-        this.props.getCart(y)
+
         this.getTotalPrice(y)
     }
 
@@ -106,34 +101,45 @@ class Cart extends Component {
         let y = this.props.cartRedux
         if (type === "minus") { y[index].qty -= 1 }
         if (type === "plus") { y[index].qty += 1 }
-        switch (true) {
-            case cartLogin !== null:
-                localStorage.setItem(
-                    "cartLogin",
-                    JSON.stringify(y)
-                )
-                axios.put("http://localhost:5555/tran/updatecart", {
-                    userId: y[index].userId,
-                    productId: y[index].productId,
-                    qty: y[index].qty
-                }).then().catch()
-                break;
-            case cart !== null:
-                localStorage.setItem(
-                    "cart",
-                    JSON.stringify(y)
-                )
-                break;
-            default:
-                break;
-        }
-        this.props.getCart(y)
-        this.getTotalPrice(y)
+
+        axios.get("http://localhost:5555/prod/getproductdetail", {
+            params: {
+                productId: y[index].productId
+            }
+        })
+            .then(res => {
+                if (res.data[0].inventory < y[index].qty) {
+                    y[index].qty -= 1
+                    alert(`remaining stock is only ${res.data[0].inventory} ${res.data[0].measurement}`)
+                } else {
+                    switch (true) {
+                        case cartLogin !== null:
+                            this.props.getCartLogin(y)
+                            axios.put("http://localhost:5555/tran/updatecart", {
+                                userId: y[index].userId,
+                                productId: y[index].productId,
+                                qty: y[index].qty
+                            }).then().catch()
+                            break;
+                        case cart !== null:
+                            this.props.getCartNonLogin(y)
+                            break;
+                        default:
+                            break;
+                    }
+                    this.getTotalPrice(y)
+                }
+            })
+            .catch()
     }
 
 
     gotoProductDetail = (val) => {
         this.setState({ productId: val })
+    }
+
+    checkout = () => {
+        this.setState({ checkout: true })
     }
 
     renderModal = () => {
@@ -157,7 +163,7 @@ class Cart extends Component {
     renderCart = () => {
         let map = this.props.cartRedux.map((val, index) => {
             return (
-                <tr>
+                <tr >
                     <td className="p-2 text-center align-text-top" >{index + 1}</td>
                     <td className="p-2 text-center align-text-top" >{val.category}</td>
                     <td className="p-2 text-center align-text-top" >{val.brand}</td>
@@ -225,6 +231,12 @@ class Cart extends Component {
                             :
                             null
                     }
+                    <td className="p-2 text-right align-text-top border-right-0" >
+                        {val.inventory}
+                    </td>
+                    <td className="p-2 text-left align-text-top border-left-0" >
+                        {val.measurement}
+                    </td>
                     <td className="p-2 text-center align-text-top" >
                         <Button disabled={val.qty === 1} size="sm" className="mr-2" onClick={() => this.changeQty("minus", index)} >
                             -
@@ -282,50 +294,57 @@ class Cart extends Component {
     }
 
     render() {
-        console.log(this.props.cartRedux);
-        switch (true) {
-            case this.props.cartRedux.length > 0 && !this.state.productId:
-                return (
-                    <div className="mt-3" id="curtain" style={{ marginLeft: "100px" }} >
-                        <h1 >Your Cart</h1>
-                        {this.renderModal()}
-                        <table className="table-bordered mb-2" style={{ width: "1350px" }} >
-                            <thead style={{ backgroundColor: "#ffc61a" }} className="font-weight-bold">
-                                <td></td>
-                                <td className="p-2 text-center align-text-top" >Category</td>
-                                <td className="p-2 text-center align-text-top" >Brand</td>
-                                <td className="p-2 text-center align-text-top" >Name</td>
-                                <td className="p-2 text-center align-text-top" >Note</td>
-                                <td className="p-2 text-center align-text-top" >Pic</td>
-                                <td className="p-2 text-center align-text-top" >Price</td>
-                                <td className="p-2 text-center align-text-top" >Disc</td>
-                                <td className="p-2 text-center align-text-top" >Price After Disc</td>
-                                <td className="p-2 text-center align-text-top" >Qty</td>
-                                <td className="p-2 text-center align-text-top" >Total Price</td>
-                                <td className="p-2 text-center align-text-top" ></td>
-                            </thead>
-                            <tbody>
-                                {this.renderCart()}
-                                <tr >
-                                    <td colSpan="9" className="text-right font-weight-bold p-2" >
-                                        Grand Total
-                                    </td>
-                                    <td colSpan="3" className="font-weight-bold p-2" >
-                                        <NumberFormat prefix="IDR " displayType={'text'} value={this.state.grandTotal} thousandSeparator={true} />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <Button onClick={() => this.emptyCartClick()} >
-                            Empty Cart
-                        </Button>
-                    </div>
-                )
-            case this.props.cartRedux.length > 0:
-                return <Redirect to={`/Productdetail/${this.state.productId}`} />
-            default:
-                alert("your cart is empty")
-                return <Redirect to="/" />
+        if (this.props.cartRedux.length > 0) {
+            switch (true) {
+                case this.state.productId !== false:
+                    return <Redirect to={`/Productdetail/${this.state.productId}`} />
+                case this.state.checkout:
+                    return <Redirect to="/Checkout" />
+                default:
+                    return (
+                        <div className="mt-3" id="curtain" style={{ marginLeft: "100px" }} >
+                            <h1 >Your Cart</h1>
+                            {this.renderModal()}
+                            <table className="table-bordered mb-2" style={{ width: "1350px" }} >
+                                <thead style={{ backgroundColor: "#ffc61a" }} className="font-weight-bold">
+                                    <td></td>
+                                    <td className="p-2 text-center align-text-top" >Category</td>
+                                    <td className="p-2 text-center align-text-top" >Brand</td>
+                                    <td className="p-2 text-center align-text-top" >Name</td>
+                                    <td className="p-2 text-center align-text-top" >Note</td>
+                                    <td className="p-2 text-center align-text-top" >Pic</td>
+                                    <td className="p-2 text-center align-text-top" >Price</td>
+                                    <td className="p-2 text-center align-text-top" >Disc</td>
+                                    <td className="p-2 text-center align-text-top" >Price After Disc</td>
+                                    <td className="p-2 text-center align-text-top" colSpan="2" >Remaining Stock</td>
+                                    <td className="p-2 text-center align-text-top" >Purchase qty</td>
+                                    <td className="p-2 text-center align-text-top" >Total Price</td>
+                                    <td className="p-2 text-center align-text-top" ></td>
+                                </thead>
+                                <tbody>
+                                    {this.renderCart()}
+                                    <tr >
+                                        <td colSpan="9" className="text-right font-weight-bold p-2" >
+                                            Grand Total
+                                            </td>
+                                        <td colSpan="3" className="font-weight-bold p-2" >
+                                            <NumberFormat prefix="IDR " displayType={'text'} value={this.state.grandTotal} thousandSeparator={true} />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <Button onClick={() => this.emptyCartClick()} >
+                                Empty Cart
+                                </Button>
+                            <Button className="ml-1" onClick={() => this.checkout()} >
+                                Check Out
+                                </Button>
+                        </div>
+                    )
+            }
+        } else {
+            alert("your cart is empty")
+            return <Redirect to="/" />
         }
     }
 }
@@ -337,4 +356,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps, { getCart, emptyCart })(Cart)
+export default connect(mapStateToProps, { getCartLogin, getCartNonLogin, emptyCart })(Cart)

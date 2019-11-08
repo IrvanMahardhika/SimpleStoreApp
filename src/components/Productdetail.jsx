@@ -65,7 +65,7 @@ class Productdetail extends Component {
 
     addTocart = () => {
         let token = localStorage.getItem("token")
-        let y = this.props.cartRedux.filter(val => val.productId !== this.props.match.params.id)
+        // let y = this.props.cartRedux.filter(val => val.productId !== this.props.match.params.id)
         if (this.props.loginRedux.length > 0) {
             axios.get("http://localhost:5555/tran/checkcart", {
                 params: {
@@ -81,7 +81,8 @@ class Productdetail extends Component {
                         axios.put("http://localhost:5555/tran/updatecart", {
                             userId: this.props.loginRedux[0].userId,
                             productId: this.props.match.params.id,
-                            qty: this.state.qty
+                            qty: this.state.qty,
+                            note: this.state.note
                         })
                             .then(res => {
                                 let z = {
@@ -102,8 +103,8 @@ class Productdetail extends Component {
                                     inventory: this.state.productDetail[0].inventory,
                                     measurement: this.state.productDetail[0].measurement
                                 }
-                                y.push(z)
-                                this.props.getCartLogin(y)
+                                // y.push(z)
+                                this.props.getCartLogin()
                             })
                             .catch()
                     } else {
@@ -133,32 +134,86 @@ class Productdetail extends Component {
                                     inventory: this.state.productDetail[0].inventory,
                                     measurement: this.state.productDetail[0].measurement
                                 }
-                                y.push(z)
-                                this.props.getCartLogin(y)
+                                // y.push(z)
+                                this.props.getCartLogin()
                             })
                             .catch()
                     }
                 })
                 .catch()
         } else {
-            let z = {
-                start: this.state.productDetail[0].start,
-                end: this.state.productDetail[0].end,
-                productId: this.props.match.params.id,
-                category: this.state.productDetail[0].category,
-                brand: this.state.productDetail[0].brand,
-                name: this.state.productDetail[0].name,
-                note: this.state.note,
-                price: this.state.productDetail[0].price,
-                productpic1: this.state.productDetail[0].productpic1,
-                discpercent: this.state.productDetail[0].discpercent,
-                discvalue: this.state.productDetail[0].discvalue,
-                qty: this.state.qty,
-                inventory: this.state.productDetail[0].inventory,
-                measurement: this.state.productDetail[0].measurement
-            }
-            y.push(z)
-            this.props.getCartNonLogin(y)
+            let localUser = localStorage.getItem("localUser")
+            axios.get("http://localhost:5555/tran/checkcartnonlogin", {
+                params: {
+                    userId: localUser,
+                    productId: this.props.match.params.id
+                }
+            })
+                .then(pos => {
+                    if (pos.data.length > 0) {
+                        axios.put("http://localhost:5555/tran/updatecartnonlogin", {
+                            userId: localUser,
+                            productId: this.props.match.params.id,
+                            qty: this.state.qty,
+                            note: this.state.note
+                        })
+                            .then(res => {
+                                let z = {
+                                    cartId: pos.data[0].cartId,
+                                    userId: localUser,
+                                    start: this.state.productDetail[0].start,
+                                    end: this.state.productDetail[0].end,
+                                    productId: this.props.match.params.id,
+                                    category: this.state.productDetail[0].category,
+                                    brand: this.state.productDetail[0].brand,
+                                    name: this.state.productDetail[0].name,
+                                    note: this.state.note,
+                                    price: this.state.productDetail[0].price,
+                                    productpic1: this.state.productDetail[0].productpic1,
+                                    discpercent: this.state.productDetail[0].discpercent,
+                                    discvalue: this.state.productDetail[0].discvalue,
+                                    qty: this.state.qty,
+                                    inventory: this.state.productDetail[0].inventory,
+                                    measurement: this.state.productDetail[0].measurement
+                                }
+                                // y.push(z)
+                                this.props.getCartNonLogin()
+                            })
+                            .catch()
+                    } else {
+                        axios.post("http://localhost:5555/tran/addtocartnonlogin",
+                            {
+                                userId: localUser,
+                                productId: this.props.match.params.id,
+                                qty: this.state.qty,
+                                note: this.state.note
+                            })
+                            .then(res => {
+                                let z = {
+                                    cartId: res.data.insertId,
+                                    userId: localUser,
+                                    start: this.state.productDetail[0].start,
+                                    end: this.state.productDetail[0].end,
+                                    productId: this.props.match.params.id,
+                                    category: this.state.productDetail[0].category,
+                                    brand: this.state.productDetail[0].brand,
+                                    name: this.state.productDetail[0].name,
+                                    note: this.state.note,
+                                    price: this.state.productDetail[0].price,
+                                    productpic1: this.state.productDetail[0].productpic1,
+                                    discpercent: this.state.productDetail[0].discpercent,
+                                    discvalue: this.state.productDetail[0].discvalue,
+                                    qty: this.state.qty,
+                                    inventory: this.state.productDetail[0].inventory,
+                                    measurement: this.state.productDetail[0].measurement
+                                }
+                                // y.push(z)
+                                this.props.getCartNonLogin()
+                            })
+                            .catch()
+                    }
+                })
+                .catch()
         }
         alert("Add to cart success")
     }

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Route, BrowserRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { keepLogin, getData } from "../action/index"
-import { getCartLogin, getCartNonLogin } from "../action/tran"
+import { getCartLogin, getCartNonLogin, keepCart } from "../action/tran"
 
 import Home from "./Home"
 import Register from "./Register"
@@ -28,6 +28,14 @@ class App extends Component {
     }
 
     componentDidMount() {
+        let localUser = localStorage.getItem("localUser")
+        if (!localUser) {
+            let random
+            do {
+                random = parseInt(Math.random() * 1000000).toString()
+            } while (random < 100000);
+            localStorage.setItem("localUser", random);
+        }
         let storage = JSON.parse(localStorage.getItem("userData"))
         let cart = JSON.parse(localStorage.getItem("cart"))
         let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
@@ -35,14 +43,16 @@ class App extends Component {
             if (cartLogin) {
                 this.props.keepLogin(storage)
                 this.props.getData()
-                this.props.getCartLogin(cartLogin)
+                this.props.keepCart(cartLogin)
+                this.props.getCartLogin()
             } else {
                 this.props.keepLogin(storage)
                 this.props.getData()
             }
         } else {
             if (cart) {
-                this.props.getCartNonLogin(cart)
+                this.props.keepCart(cart)
+                this.props.getCartNonLogin()
             }
         }
         this.setState({ check: true })
@@ -71,7 +81,7 @@ class App extends Component {
             )
         } else {
             return (
-                <div style={{backgroundColor: "#ffc61a", height:"1000px"}} className="text-center" >
+                <div style={{ backgroundColor: "#ffc61a", height: "1000px" }} className="text-center" >
                     <img src={require("./Logo.png")} style={{ width: "1200px", height: "600px" }} alt="No pic" />
                     <h1 >Loading .....</h1>
                 </div>
@@ -80,4 +90,4 @@ class App extends Component {
     }
 }
 
-export default connect(null, { keepLogin, getData, getCartLogin, getCartNonLogin })(App)
+export default connect(null, { keepLogin, getData, getCartLogin, getCartNonLogin, keepCart })(App)

@@ -49,6 +49,11 @@ class Cart extends Component {
                 this.props.emptyCart("cartLogin")
                 break;
             case cart !== null:
+                for (let i = 0; i < this.props.cartRedux.length; i++) {
+                    axios.delete("http://localhost:5555/tran/deletecartnonlogin/" + this.props.cartRedux[i].cartId)
+                        .then()
+                        .catch()
+                }
                 this.props.emptyCart("cart")
                 break;
             default:
@@ -62,18 +67,20 @@ class Cart extends Component {
         let y = this.props.cartRedux.filter(val => val.productId !== productId)
         switch (true) {
             case cartLogin !== null:
-                this.props.getCartLogin(y)
                 axios.delete("http://localhost:5555/tran/deletecart/" + cartId)
                     .then()
                     .catch()
+                this.props.getCartLogin()
                 break;
             case cart !== null:
-                this.props.getCartNonLogin(y)
+                axios.delete("http://localhost:5555/tran/deletecartnonlogin/" + cartId)
+                    .then()
+                    .catch()
+                this.props.getCartNonLogin()
                 break;
             default:
                 break;
         }
-
         this.getTotalPrice(y)
     }
 
@@ -108,21 +115,34 @@ class Cart extends Component {
             }
         })
             .then(res => {
-                if (res.data[0].inventory < y[index].qty) {
+                if (res.data[0].inventory < y[index].qty && type === "plus") {
                     y[index].qty -= 1
                     alert(`remaining stock is only ${res.data[0].inventory} ${res.data[0].measurement}`)
                 } else {
                     switch (true) {
                         case cartLogin !== null:
-                            this.props.getCartLogin(y)
                             axios.put("http://localhost:5555/tran/updatecart", {
                                 userId: y[index].userId,
                                 productId: y[index].productId,
-                                qty: y[index].qty
-                            }).then().catch()
+                                qty: y[index].qty,
+                                note: y[index].note
+                            })
+                                .then(res => {
+                                    this.props.getCartLogin()
+                                })
+                                .catch()
                             break;
                         case cart !== null:
-                            this.props.getCartNonLogin(y)
+                            axios.put("http://localhost:5555/tran/updatecartnonlogin", {
+                                userId: y[index].userId,
+                                productId: y[index].productId,
+                                qty: y[index].qty,
+                                note: y[index].note
+                            })
+                                .then(res => {
+                                    this.props.getCartNonLogin()
+                                })
+                                .catch()
                             break;
                         default:
                             break;
@@ -274,19 +294,9 @@ class Cart extends Component {
                             :
                             null
                     }
-                    {
-                        val.cartId
-                            ?
-                            <td className="p-2 text-center align-text-top" >
-                                <Button size="sm" color="secondary" onClick={() => this.removeItem(val.productId, val.cartId)} >Delete</Button>
-                            </td>
-                            :
-                            <td className="p-2 text-center align-text-top" >
-                                <Button size="sm" color="secondary" onClick={() => this.removeItem(val.productId)} >Delete</Button>
-                            </td>
-
-                    }
-
+                    <td className="p-2 text-center align-text-top" >
+                        <Button size="sm" color="secondary" onClick={() => this.removeItem(val.productId, val.cartId)} >Delete</Button>
+                    </td>
                 </tr>
             )
         })

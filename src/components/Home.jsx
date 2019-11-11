@@ -48,13 +48,13 @@ class Home extends Component {
                     :
                     null
                 }
-                <div style={{width:"1350px"}} id="curtain" >
+                <div id="curtain2" >
                     {this.renderCarousel()}
                 </div>
                 
                 <br></br>
                 <p className="h5 my-1" style={{color:"#737373"}}>New Products</p>
-                <div style={{width:"1350px"}} id="curtain" >
+                <div id="curtain2" >
                     {this.renderCarouselHomeNewProducts()}
                 </div>
             </div>

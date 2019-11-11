@@ -13,7 +13,7 @@ class Transtat extends Component {
 
     render () {
         return (
-            <div id="curtain" className="row justify-content-center">
+            <div id="curtain2" className="row justify-content-center">
                 <Card className="mt-5" style={{width:"600px"}}>
                     <CardHeader>Transaction Status</CardHeader>
                     <CardBody>

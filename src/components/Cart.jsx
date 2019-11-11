@@ -159,7 +159,15 @@ class Cart extends Component {
     }
 
     checkout = () => {
-        this.setState({ checkout: true })
+        let y = this.props.cartRedux
+        try {
+            for (let i = 0; i < y.length; i++) {
+                if (y[i].inventory < y[i].qty) throw "can not continue to checkout, there are items in your cart that exceed the seller's inventory"
+            }
+            this.setState({ checkout: true })
+        } catch (error) {
+            alert(error)
+        }
     }
 
     renderModal = () => {
@@ -257,7 +265,7 @@ class Cart extends Component {
                     <td className="p-2 text-left align-text-top border-left-0" >
                         {val.measurement}
                     </td>
-                    <td className="p-2 text-center align-text-top" >
+                    <td className={val.inventory < val.qty ? "p-2 text-center align-text-top text-danger" : "p-2 text-center align-text-top"} >
                         <Button disabled={val.qty === 1} size="sm" className="mr-2" onClick={() => this.changeQty("minus", index)} >
                             -
                     </Button>
@@ -312,7 +320,7 @@ class Cart extends Component {
                     return <Redirect to="/Checkout" />
                 default:
                     return (
-                        <div className="mt-3" id="curtain" style={{ marginLeft: "100px" }} >
+                        <div className="mt-3" id="curtain2" style={{ marginLeft: "100px" }} >
                             <h1 >Your Cart</h1>
                             {this.renderModal()}
                             <table className="table-bordered mb-2" style={{ width: "1350px" }} >

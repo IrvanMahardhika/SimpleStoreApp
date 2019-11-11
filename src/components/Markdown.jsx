@@ -853,7 +853,7 @@ class Markdown extends Component {
         switch (true) {
             case this.props.loginRedux.length>0:
                 return (
-                    <div className="mt-3 mx-5" id="curtain">
+                    <div className="mt-3 mx-5" id="curtain2">
                         <h1>{this.props.loginRedux[0].storename}'s Product Price Markdown</h1>
                         <br></br>
                         {

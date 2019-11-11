@@ -43,7 +43,7 @@ class Login extends Component {
         if (this.props.loginRedux.length===0) {
             return (
                 <div>
-                    <div id="curtain" className="row p-3 my-2 rounded justify-content-center">
+                    <div id="curtain2" className="row p-3 my-2 rounded justify-content-center">
                         <Toast style={{width:"100%"}}>
                             <ToastHeader>
                                 Login

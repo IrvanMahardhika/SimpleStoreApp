@@ -27,6 +27,8 @@ export const getCartLogin = () => {
             }
         })
             .then(res => {
+                console.log(res.data);
+                
                 localStorage.setItem(
                     "cartLogin",
                     JSON.stringify(res.data)

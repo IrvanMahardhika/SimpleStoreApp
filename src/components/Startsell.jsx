@@ -210,7 +210,7 @@ class Startsell extends Component {
         switch (true) {
             case this.props.loginRedux.length>0 && this.props.loginRedux[0].storename===null :
                 return (
-                    <div id="curtain" className="mt-3 mx-5">
+                    <div id="curtain2" className="mt-3 mx-5">
                         <p className="h3">
                             Take your chance <br></br> selling at SimpleStore
                         </p>
@@ -234,7 +234,7 @@ class Startsell extends Component {
                                 </NavLink>
                             </NavItem>
                         </Nav>
-                        <TabContent id="curtain" activeTab={this.state.activeTab}>
+                        <TabContent id="curtain2" activeTab={this.state.activeTab}>
                             <TabPane style={{width:"500px"}} tabId="1">
                                 <h5 className="mt-3">Your e-mail and cellphone have to be verified to continue</h5>
                                 <Card className="my-3" body>

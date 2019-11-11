@@ -65,7 +65,6 @@ class Productdetail extends Component {
 
     addTocart = () => {
         let token = localStorage.getItem("token")
-        // let y = this.props.cartRedux.filter(val => val.productId !== this.props.match.params.id)
         if (this.props.loginRedux.length > 0) {
             axios.get("http://localhost:5555/tran/checkcart", {
                 params: {
@@ -85,25 +84,6 @@ class Productdetail extends Component {
                             note: this.state.note
                         })
                             .then(res => {
-                                let z = {
-                                    cartId: pos.data[0].cartId,
-                                    userId: this.props.loginRedux[0].userId,
-                                    start: this.state.productDetail[0].start,
-                                    end: this.state.productDetail[0].end,
-                                    productId: this.props.match.params.id,
-                                    category: this.state.productDetail[0].category,
-                                    brand: this.state.productDetail[0].brand,
-                                    name: this.state.productDetail[0].name,
-                                    note: this.state.note,
-                                    price: this.state.productDetail[0].price,
-                                    productpic1: this.state.productDetail[0].productpic1,
-                                    discpercent: this.state.productDetail[0].discpercent,
-                                    discvalue: this.state.productDetail[0].discvalue,
-                                    qty: this.state.qty,
-                                    inventory: this.state.productDetail[0].inventory,
-                                    measurement: this.state.productDetail[0].measurement
-                                }
-                                // y.push(z)
                                 this.props.getCartLogin()
                             })
                             .catch()
@@ -116,25 +96,6 @@ class Productdetail extends Component {
                                 note: this.state.note
                             })
                             .then(res => {
-                                let z = {
-                                    cartId: res.data.insertId,
-                                    userId: this.props.loginRedux[0].userId,
-                                    start: this.state.productDetail[0].start,
-                                    end: this.state.productDetail[0].end,
-                                    productId: this.props.match.params.id,
-                                    category: this.state.productDetail[0].category,
-                                    brand: this.state.productDetail[0].brand,
-                                    name: this.state.productDetail[0].name,
-                                    note: this.state.note,
-                                    price: this.state.productDetail[0].price,
-                                    productpic1: this.state.productDetail[0].productpic1,
-                                    discpercent: this.state.productDetail[0].discpercent,
-                                    discvalue: this.state.productDetail[0].discvalue,
-                                    qty: this.state.qty,
-                                    inventory: this.state.productDetail[0].inventory,
-                                    measurement: this.state.productDetail[0].measurement
-                                }
-                                // y.push(z)
                                 this.props.getCartLogin()
                             })
                             .catch()
@@ -158,25 +119,6 @@ class Productdetail extends Component {
                             note: this.state.note
                         })
                             .then(res => {
-                                let z = {
-                                    cartId: pos.data[0].cartId,
-                                    userId: localUser,
-                                    start: this.state.productDetail[0].start,
-                                    end: this.state.productDetail[0].end,
-                                    productId: this.props.match.params.id,
-                                    category: this.state.productDetail[0].category,
-                                    brand: this.state.productDetail[0].brand,
-                                    name: this.state.productDetail[0].name,
-                                    note: this.state.note,
-                                    price: this.state.productDetail[0].price,
-                                    productpic1: this.state.productDetail[0].productpic1,
-                                    discpercent: this.state.productDetail[0].discpercent,
-                                    discvalue: this.state.productDetail[0].discvalue,
-                                    qty: this.state.qty,
-                                    inventory: this.state.productDetail[0].inventory,
-                                    measurement: this.state.productDetail[0].measurement
-                                }
-                                // y.push(z)
                                 this.props.getCartNonLogin()
                             })
                             .catch()
@@ -189,25 +131,6 @@ class Productdetail extends Component {
                                 note: this.state.note
                             })
                             .then(res => {
-                                let z = {
-                                    cartId: res.data.insertId,
-                                    userId: localUser,
-                                    start: this.state.productDetail[0].start,
-                                    end: this.state.productDetail[0].end,
-                                    productId: this.props.match.params.id,
-                                    category: this.state.productDetail[0].category,
-                                    brand: this.state.productDetail[0].brand,
-                                    name: this.state.productDetail[0].name,
-                                    note: this.state.note,
-                                    price: this.state.productDetail[0].price,
-                                    productpic1: this.state.productDetail[0].productpic1,
-                                    discpercent: this.state.productDetail[0].discpercent,
-                                    discvalue: this.state.productDetail[0].discvalue,
-                                    qty: this.state.qty,
-                                    inventory: this.state.productDetail[0].inventory,
-                                    measurement: this.state.productDetail[0].measurement
-                                }
-                                // y.push(z)
                                 this.props.getCartNonLogin()
                             })
                             .catch()
@@ -222,7 +145,7 @@ class Productdetail extends Component {
         console.log(this.props.cartRedux);
 
         return (
-            <div className="mt-3" id="curtain" style={{ marginLeft: "100px" }} >
+            <div className="mt-3" id="curtain2" style={{ marginLeft: "100px" }} >
                 <Row className="ml-1 mb-3" >
                     <Card className="mr-1" style={{ backgroundColor: "#ffc61a", width: "425px" }} >
                         <CardImg className="mx-auto m-3" src={"http://localhost:5555/" + this.state.renderpic} style={{ height: "450px", width: "400px", objectFit: "cover" }} alt="Card image cap" />

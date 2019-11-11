@@ -316,7 +316,7 @@ class Addproduct extends Component {
         switch (true) {
             case this.props.loginRedux.length > 0:
                 return (
-                    <div className="mt-3 mx-5" id="curtain">
+                    <div className="mt-3 mx-5" id="curtain2">
                         {this.renderModal()}
                         <h1>Add Product of {this.props.loginRedux[0].storename}</h1>
                         <Row className="mb-3">

@@ -69,7 +69,7 @@ class Carouselhome extends Component {
         const slides = items.map((item) => {
         return (
                 <CarouselItem onExiting={this.onExiting} onExited={this.onExited} key={item.src}>
-                    <div style={{height:"250px"}} id="curtain" className="row justify-content-center">
+                    <div style={{height:"250px"}} id="curtain2" className="text-center">
                         <img src={item.src} alt={item.altText}/>  
                     </div>
                     <CarouselCaption captionText={item.caption} captionHeader={item.caption} />
@@ -78,7 +78,7 @@ class Carouselhome extends Component {
         });
         return (
             <Row style={{backgroundColor:"#ffc61a"}}>
-                <Col sm="12">
+                <Col >
                     <Carousel activeIndex={activeIndex} next={this.next} previous={this.previous}>
                         <CarouselIndicators items={items} activeIndex={activeIndex} onClickHandler={this.goToIndex} />
                             {slides}

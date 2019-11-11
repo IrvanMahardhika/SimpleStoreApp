@@ -33,7 +33,7 @@ class Forgotpasswordstart extends Component {
             case this.props.registerRedux==="":
                 return (
                     <div>
-                        <div id="curtain" className="row p-3 my-5 rounded justify-content-center">
+                        <div id="curtain2" className="row p-3 my-5 rounded justify-content-center">
                             <Toast style={{width:"100%"}}>
                                 <ToastHeader>
                                     Forgot Password

@@ -16,7 +16,7 @@ class CarouselHomeNewProducts extends Component {
     state = {
         newProductList: [],
         activeItemIndex: 0,
-        chevronWidth: 30,
+        chevronWidth: 5,
         productId: false
     }
 
@@ -48,8 +48,8 @@ class CarouselHomeNewProducts extends Component {
     renderNewProduct = () => {
         let z = this.state.newProductList.map(val => {
             return (
-                <Card id="pointer" onClick={() => this.gotoProductDetail(val.productId)} className="border-warning d-inline-block p-0" style={{ width: "150px", margin: "5px", fontSize: "12px" }}>
-                    <CardImg className="m-1" top style={{ width: "140px", height: "100px", objectFit: "cover" }} src={"http://localhost:5555/" + val.productpic1} alt="Card image cap" />
+                <Card id="cardCarouselHome" onClick={() => this.gotoProductDetail(val.productId)} className="border-warning d-inline-block p-0 mx-3" style={{ marginBottom: "5px", marginTop: "5px", fontSize: "12px" }}>
+                    <CardImg className="m-1 mx-1" top style={{ width: "140px", height: "100px", objectFit: "contain" }} src={"http://localhost:5555/" + val.productpic1} alt="Card image cap" />
                     {
                         val.discpercent !== null
                             ?
@@ -62,22 +62,22 @@ class CarouselHomeNewProducts extends Component {
                             null
                     }
                     {
-                        val.discvalue !== null && val.discvalue<1000000
+                        val.discvalue !== null && val.discvalue < 1000000
                             ?
                             <CardImgOverlay className="p-1" >
                                 <CardTitle className="text-danger font-weight-bolder h6 text-right" >
-                                    <NumberFormat style={{ backgroundColor: "white" }} displayType={'text'} className="border-0" prefix="- IDR " suffix="K" value={val.discvalue/1000} thousandSeparator={true} />
+                                    <NumberFormat style={{ backgroundColor: "white" }} displayType={'text'} className="border-0" prefix="- IDR " suffix="K" value={val.discvalue / 1000} thousandSeparator={true} />
                                 </CardTitle>
                             </CardImgOverlay>
                             :
                             null
                     }
                     {
-                        val.discvalue !== null && val.discvalue>1000000
+                        val.discvalue !== null && val.discvalue > 1000000
                             ?
                             <CardImgOverlay className="p-1" >
                                 <CardTitle className="text-danger font-weight-bolder h6 text-right" >
-                                    <NumberFormat style={{ backgroundColor: "white" }} displayType={'text'} className="border-0" prefix="- IDR " suffix="Mio" value={val.discvalue/1000000} thousandSeparator={true} />
+                                    <NumberFormat style={{ backgroundColor: "white" }} displayType={'text'} className="border-0" prefix="- IDR " suffix="Mio" value={val.discvalue / 1000000} thousandSeparator={true} />
                                 </CardTitle>
                             </CardImgOverlay>
                             :
@@ -129,7 +129,7 @@ class CarouselHomeNewProducts extends Component {
                     <ItemsCarousel
                         // requestToChangeActive={}
                         activeItemIndex={this.state.activeItemIndex}
-                        numberOfCards={8}
+                        numberOfCards={7}
                         gutter={0}
                         leftChevron={<button onClick={() => this.setActiveItemIndex(1)} >{'<'}</button>}
                         rightChevron={<button onClick={() => this.setActiveItemIndex(2)} >{'>'}</button>}

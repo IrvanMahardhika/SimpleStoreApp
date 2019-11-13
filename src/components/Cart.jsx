@@ -115,9 +115,9 @@ class Cart extends Component {
             }
         })
             .then(res => {
-                if (res.data[0].inventory < y[index].qty && type === "plus") {
+                if (res.data[0].inventory - res.data[0].checkoutqty < y[index].qty && type === "plus") {
                     y[index].qty -= 1
-                    alert(`remaining stock is only ${res.data[0].inventory} ${res.data[0].measurement}`)
+                    alert(`remaining stock is only ${res.data[0].inventory - res.data[0].checkoutqty} ${res.data[0].measurement}`)
                 } else {
                     switch (true) {
                         case cartLogin !== null:
@@ -159,14 +159,49 @@ class Cart extends Component {
     }
 
     checkout = () => {
-        let y = this.props.cartRedux
-        try {
-            for (let i = 0; i < y.length; i++) {
-                if (y[i].inventory < y[i].qty) throw "can not continue to checkout, there are items in your cart that exceed the seller's inventory"
-            }
-            this.setState({ checkout: true })
-        } catch (error) {
-            alert(error)
+        let localUser = localStorage.getItem("localUser")
+        let storage = JSON.parse(localStorage.getItem("userData"))
+        let token = localStorage.getItem("token")
+        if (storage) {
+            axios.get("http://localhost:5555/tran/getcart", {
+                params: {
+                    userId: storage[0].userId
+                },
+                headers: {
+                    authorization: token
+                }
+            })
+                .then(res => {
+                    try {
+                        for (let i = 0; i < res.data.length; i++) {
+                            if (res.data[i].inventory - res.data[i].checkoutqty < res.data[i].qty) throw "can not continue to checkout, there are items in your cart that exceed the seller's inventory"
+                        }
+                        this.setState({ checkout: true })
+                    } catch (error) {
+                        alert(error)
+                    }
+                })
+                .catch()
+        } else {
+            axios.get("http://localhost:5555/tran/getcartnonlogin", {
+                params: {
+                    userId: localUser
+                },
+                headers: {
+                    authorization: token
+                }
+            })
+                .then(res => {
+                    try {
+                        for (let i = 0; i < res.data.length; i++) {
+                            if (res.data[i].inventory - res.data[i].checkoutqty < res.data[i].qty) throw "can not continue to checkout, there are items in your cart that exceed the seller's inventory"
+                        }
+                        this.setState({ checkout: true })
+                    } catch (error) {
+                        alert(error)
+                    }
+                })
+                .catch()
         }
     }
 
@@ -260,12 +295,12 @@ class Cart extends Component {
                             null
                     }
                     <td className="p-2 text-right align-text-top border-right-0" >
-                        {val.inventory}
+                        {val.inventory - val.checkoutqty}
                     </td>
                     <td className="p-2 text-left align-text-top border-left-0" >
                         {val.measurement}
                     </td>
-                    <td className={val.inventory < val.qty ? "p-2 text-center align-text-top text-danger" : "p-2 text-center align-text-top"} >
+                    <td className={val.inventory - val.checkoutqty < val.qty ? "p-2 text-center align-text-top text-danger" : "p-2 text-center align-text-top"} >
                         <Button disabled={val.qty === 1} size="sm" className="mr-2" onClick={() => this.changeQty("minus", index)} >
                             -
                     </Button>
@@ -312,7 +347,9 @@ class Cart extends Component {
     }
 
     render() {
-        if (this.props.cartRedux.length > 0) {
+        console.log(this.props.cartRedux);
+        
+        if (this.props.cartRedux.length > 0 && !this.props.homeRedux ) {
             switch (true) {
                 case this.state.productId !== false:
                     return <Redirect to={`/Productdetail/${this.state.productId}`} />
@@ -323,7 +360,7 @@ class Cart extends Component {
                         <div className="mt-3" id="curtain2" style={{ marginLeft: "100px" }} >
                             <h1 >Your Cart</h1>
                             {this.renderModal()}
-                            <table className="table-bordered mb-2" style={{ width: "1350px" }} >
+                            <table className="table-bordered mb-2" style={{ width: "1200px" }} >
                                 <thead style={{ backgroundColor: "#ffc61a" }} className="font-weight-bold">
                                     <td></td>
                                     <td className="p-2 text-center align-text-top" >Category</td>
@@ -348,6 +385,9 @@ class Cart extends Component {
                                         <td colSpan="3" className="font-weight-bold p-2" >
                                             <NumberFormat prefix="IDR " displayType={'text'} value={this.state.grandTotal} thousandSeparator={true} />
                                         </td>
+                                        <td colSpan="2" className="font-weight-bold p-2" >
+                                            
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -360,6 +400,8 @@ class Cart extends Component {
                         </div>
                     )
             }
+        } else if (this.props.cartRedux.length > 0 && this.props.homeRedux) {
+            return <Redirect to="/" />
         } else {
             alert("your cart is empty")
             return <Redirect to="/" />
@@ -369,7 +411,8 @@ class Cart extends Component {
 
 const mapStateToProps = state => {
     return {
-        cartRedux: state.cart.cart
+        cartRedux: state.cart.cart,
+        homeRedux: state.home.home
     }
 }
 

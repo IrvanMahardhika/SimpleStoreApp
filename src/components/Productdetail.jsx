@@ -37,9 +37,9 @@ class Productdetail extends Component {
         let z = this.state.qty
         if (val === "minus") { z -= 1 }
         if (val === "plus") { z += 1 }
-        if (z > this.state.productDetail[0].inventory) {
+        if (z > this.state.productDetail[0].inventory - this.state.productDetail[0].checkoutqty) {
             this.setState({ qty: 1 })
-            alert(`remaining stock is only ${this.state.productDetail[0].inventory} ${this.state.productDetail[0].measurement}`)
+            alert(`remaining stock is only ${this.state.productDetail[0].inventory - this.state.productDetail[0].checkoutqty} ${this.state.productDetail[0].measurement}`)
         } else {
             this.setState({ qty: z })
         }
@@ -53,9 +53,9 @@ class Productdetail extends Component {
             case val.substr(0, 1) === "0":
                 this.setState({ qty: parseInt(val) })
                 break;
-            case val > this.state.productDetail[0].inventory:
+            case val > this.state.productDetail[0].inventory - this.state.productDetail[0].checkoutqty:
                 this.setState({ qty: 1 })
-                alert(`remaining stock is only ${this.state.productDetail[0].inventory} ${this.state.productDetail[0].measurement}`)
+                alert(`remaining stock is only ${this.state.productDetail[0].inventory - this.state.productDetail[0].checkoutqty} ${this.state.productDetail[0].measurement}`)
                 break;
             default:
                 this.setState({ qty: val })
@@ -142,8 +142,6 @@ class Productdetail extends Component {
     }
 
     render() {
-        console.log(this.props.cartRedux);
-
         return (
             <div className="mt-3" id="curtain2" style={{ marginLeft: "100px" }} >
                 <Row className="ml-1 mb-3" >
@@ -256,7 +254,7 @@ class Productdetail extends Component {
                                                 Remaining Stock
                                             </td>
                                             <td className="p-2" style={{ fontSize: "20px" }} >
-                                                {this.state.productDetail[0].inventory} {this.state.productDetail[0].measurement}
+                                                {this.state.productDetail[0].inventory - this.state.productDetail[0].checkoutqty} {this.state.productDetail[0].measurement}
                                             </td>
                                         </tr>
                                         <tr >

@@ -6,8 +6,8 @@ const init = {
     location: [],
     user: [],
     cart: [],
-    cartQty: 0
-
+    cartQty: 0,
+    home: false
 }
 
 const checkReducer = (state = init, action) => {
@@ -61,13 +61,23 @@ const cartReducer = (state = init, action) => {
     }
 }
 
+const homeReducer = (state = init, action) => {
+    switch (action.type) {
+        case "HOME":
+            return { ...state, home: true }
+        default:
+            return state
+    }
+}
+
 const reducers = combineReducers(
     {
         check: checkReducer,
         login: loginReducer,
         register: registerReducer,
         location: locationReducer,
-        cart: cartReducer
+        cart: cartReducer,
+        home: homeReducer
     }
 )
 

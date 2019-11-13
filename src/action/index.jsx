@@ -93,13 +93,19 @@ export const login = (keyword, password, rememberMe) => {
                                 } else {
                                     dispatch(
                                         {
-                                            type : "EMPTY_CART"
+                                            type: "EMPTY_CART"
                                         }
                                     )
                                 }
                             })
                             .catch()
-                    }).catch()
+                    })
+                    .catch()
+                dispatch(
+                    {
+                        type: "HOME"
+                    }
+                )
             })
             .catch()
     }
@@ -145,6 +151,11 @@ export const logout = () => {
                 }
             )
         }
+        dispatch(
+            {
+                type: "HOME"
+            }
+        )
     }
 }
 

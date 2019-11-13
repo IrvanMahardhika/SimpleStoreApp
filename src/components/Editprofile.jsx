@@ -43,10 +43,6 @@ class Editprofile extends Component {
             cardNumber: "",
             cardExp: "",
             securityCode: "",
-            bankInput: false,
-            bank: "",
-            accountName: "",
-            accountNumber: "",
             dataPayment: []
         };
     }
@@ -312,60 +308,38 @@ class Editprofile extends Component {
     }
 
     addPayment = (val) => {
-        if (val === "card") {
-            switch (true) {
-                case this.state.paymentType === "":
-                    alert("select card type : visa or mastercard")
-                    break;
-                case this.state.nameOncard === "" || this.state.cardNumber === "" || this.state.cardExp === "" || this.state.securityCode === "":
-                    alert("complete all empty field")
-                    break;
-                default:
-                    axios.post("http://localhost:5555/auth/adduserpayment",
-                        {
-                            userId: this.props.loginRedux[0].userId,
-                            type: val,
-                            bank: this.state.paymentType,
-                            name: this.state.nameOncard,
-                            number: this.state.cardNumber,
-                            expiry: this.state.cardExp,
-                            securitycode: this.state.securityCode
+        switch (true) {
+            case this.state.paymentType === "":
+                alert("select card type : visa or mastercard")
+                break;
+            case this.state.nameOncard === "" || this.state.cardNumber === "" || this.state.cardExp === "" || this.state.securityCode === "":
+                alert("complete all empty field")
+                break;
+            default:
+                axios.post("http://localhost:5555/auth/adduserpayment",
+                    {
+                        userId: this.props.loginRedux[0].userId,
+                        type: val,
+                        bank: this.state.paymentType,
+                        name: this.state.nameOncard,
+                        number: this.state.cardNumber,
+                        expiry: this.state.cardExp,
+                        securitycode: this.state.securityCode
+                    }
+                )
+                    .then(res => {
+                        this.getPayment()
+                        this.setState({ paymentType: "", nameOncard: "", cardNumber: "", cardExp: "", securityCode: "" })
+                        var ele = document.getElementsByName("radio4")
+                        for (var i = 0; i < ele.length; i++) {
+                            ele[i].checked = false
                         }
-                    )
-                        .then(res => {
-                            this.getPayment()
-                            // document.getElementById("addressname").value = '';
-                            // document.getElementById("postalcode").value = '';
-                            // document.getElementById("address").value = '';
-                            this.setState({ paymentType: "", nameOncard: "", cardNumber: "", cardExp: "", securitycode: "" })
-                        }).catch()
-                    break;
-            }
-        } else {
-            switch (true) {
-                case this.state.bank === "":
-                    alert("select your bank")
-                    break;
-                case this.state.accountName === "" || this.state.accountNumber === "":
-                    alert("complete all empty field")
-                    break;
-                default:
-                    axios.post("http://localhost:5555/auth/adduserpayment",
-                        {
-                            userId: this.props.loginRedux[0].userId,
-                            type: val,
-                            bank: this.state.bank,
-                            name: this.state.accountName,
-                            number: this.state.accountNumber
-                        }
-                    )
-                        .then(res => {
-                            this.getPayment()
-                            document.getElementById("accountName").value = '';
-                            this.setState({ bank: "", accountName: "", accountNumber: "", bankInput: false })
-                        }).catch()
-                    break;
-            }
+                        document.getElementById("name").value = '';
+                        document.getElementById("number").value = '';
+                        document.getElementById("exp").value = '';
+                        document.getElementById("sec").value = '';
+                    }).catch()
+                break;
         }
     }
 
@@ -411,57 +385,57 @@ class Editprofile extends Component {
                     <CardBody className="py-auto" >
                         <Row >
                             <Col sm="3" >
-                            {
-                                val.bank === "visa"
-                                ?
-                                <img src={require('./visa.png')} id="imgCard" alt="No pic" />
-                                :
-                                null
-                            }
-                            {
-                                val.bank === "mastercard"
-                                ?
-                                <img src={require('./mastercard.jpg')} id="imgCard" alt="No pic" />
-                                :
-                                null
-                            }
-                            {
-                                val.bank === "bca"
-                                ?
-                                <img src={require('./bca.png')} id="imgCard" alt="No pic" />
-                                :
-                                null
-                            }
-                            {
-                                val.bank === "mandiri"
-                                ?
-                                <img src={require('./mandiri.jpg')} id="imgCard" alt="No pic" />
-                                :
-                                null
-                            }
-                            {
-                                val.bank === "bni"
-                                ?
-                                <img src={require('./bni.png')} id="imgCard" alt="No pic" />
-                                :
-                                null
-                            }
-                            {
-                                val.bank === "cimb"
-                                ?
-                                <img src={require('./cimb.jpg')} id="imgCard" alt="No pic" />
-                                :
-                                null
-                            }
-                            {
-                                val.bank !== "cimb" && val.bank !== "bni" && val.bank !== "mandiri" && val.bank !== "bca" && val.bank !== "visa" && val.bank !== "mastercard"
-                                ?
-                                <div className="font-weight-bold" >
-                                    {val.bank} Bank
+                                {
+                                    val.bank === "visa"
+                                        ?
+                                        <img src={require('./visa.png')} id="imgCard" alt="No pic" />
+                                        :
+                                        null
+                                }
+                                {
+                                    val.bank === "mastercard"
+                                        ?
+                                        <img src={require('./mastercard.jpg')} id="imgCard" alt="No pic" />
+                                        :
+                                        null
+                                }
+                                {
+                                    val.bank === "bca"
+                                        ?
+                                        <img src={require('./bca.png')} id="imgCard" alt="No pic" />
+                                        :
+                                        null
+                                }
+                                {
+                                    val.bank === "mandiri"
+                                        ?
+                                        <img src={require('./mandiri.jpg')} id="imgCard" alt="No pic" />
+                                        :
+                                        null
+                                }
+                                {
+                                    val.bank === "bni"
+                                        ?
+                                        <img src={require('./bni.png')} id="imgCard" alt="No pic" />
+                                        :
+                                        null
+                                }
+                                {
+                                    val.bank === "cimb"
+                                        ?
+                                        <img src={require('./cimb.jpg')} id="imgCard" alt="No pic" />
+                                        :
+                                        null
+                                }
+                                {
+                                    val.bank !== "cimb" && val.bank !== "bni" && val.bank !== "mandiri" && val.bank !== "bca" && val.bank !== "visa" && val.bank !== "mastercard"
+                                        ?
+                                        <div className="font-weight-bold" >
+                                            {val.bank} Bank
                                 </div>
-                                :
-                                null
-                            }
+                                        :
+                                        null
+                                }
                             </Col>
                             <Col sm="7" >
                                 <table >
@@ -725,7 +699,7 @@ class Editprofile extends Component {
                                                             Name on card
                                                         </td>
                                                         <td >
-                                                            : <input style={{ borderRadius: "5px" }} onChange={e => this.setState({ nameOncard: e.target.value })} />
+                                                            : <input id="name" style={{ borderRadius: "5px" }} onChange={e => this.setState({ nameOncard: e.target.value })} />
                                                         </td>
                                                     </tr>
                                                     <tr >
@@ -733,7 +707,7 @@ class Editprofile extends Component {
                                                             Card Number
                                                         </td>
                                                         <td >
-                                                            : <NumberFormat format="#### #### #### ####" placeholder="#### #### #### ####" mask="_" decimalScale="0" allowNegative={false} style={{ borderRadius: "5px" }} value={this.state.cardNumber} onChange={e => this.setState({ cardNumber: e.target.value })} />
+                                                            : <NumberFormat id="number" format="#### #### #### ####" placeholder="#### #### #### ####" mask="_" decimalScale="0" allowNegative={false} style={{ borderRadius: "5px" }} value={this.state.cardNumber} onChange={e => this.setState({ cardNumber: e.target.value })} />
                                                         </td>
                                                     </tr>
                                                     <tr >
@@ -741,7 +715,7 @@ class Editprofile extends Component {
                                                             Card Expiry
                                                         </td>
                                                         <td >
-                                                            : <NumberFormat format="##/##" placeholder="MM/YY" mask={['M', 'M', 'Y', 'Y']} decimalScale="0" allowNegative={false} style={{ width: "70px", borderRadius: "5px" }} value={this.state.cardExp} onChange={e => this.setState({ cardExp: e.target.value })} />
+                                                            : <NumberFormat id="exp" format="##/##" placeholder="MM/YY" mask={['M', 'M', 'Y', 'Y']} decimalScale="0" allowNegative={false} style={{ width: "70px", borderRadius: "5px" }} value={this.state.cardExp} onChange={e => this.setState({ cardExp: e.target.value })} />
                                                         </td>
                                                     </tr>
                                                     <tr >
@@ -749,58 +723,13 @@ class Editprofile extends Component {
                                                             Security Code
                                                         </td>
                                                         <td >
-                                                            : <NumberFormat placeholder="###" maxLength="3" decimalScale="0" allowNegative={false} style={{ width: "70px", borderRadius: "5px" }} value={this.state.securityCode} onChange={e => this.setState({ securityCode: e.target.value })} />
+                                                            : <NumberFormat id="sec" placeholder="###" maxLength="3" decimalScale="0" allowNegative={false} style={{ width: "70px", borderRadius: "5px" }} value={this.state.securityCode} onChange={e => this.setState({ securityCode: e.target.value })} />
                                                         </td>
                                                     </tr>
                                                 </table>
                                             </CardBody>
                                             <CardFooter >
                                                 <Button onClick={() => this.addPayment("card")} >
-                                                    Add
-                                                    </Button>
-                                            </CardFooter>
-                                        </Card>
-                                        <Card className="mb-2" >
-                                            <CardHeader >
-                                                Bank Transfer
-                                            </CardHeader>
-                                            <CardBody >
-                                                <p className="mb-0" >
-                                                    <input value="bca" name="radio5" type="radio" onClick={e => this.setState({ bank: e.target.value, bankInput: false })} /> <img src={require('./bca.png')} id="imgCard" alt="No pic" />
-                                                    <input className="ml-3" value="mandiri" name="radio5" type="radio" onClick={e => this.setState({ bank: e.target.value, bankInput: false })} /> <img src={require('./mandiri.jpg')} id="imgCard" alt="No pic" />
-                                                    <input className="ml-3" value="bni" name="radio5" type="radio" onClick={e => this.setState({ bank: e.target.value, bankInput: false })} /> <img src={require('./bni.jpg')} id="imgCard" alt="No pic" />
-                                                    <br></br>
-                                                    <input value="cimb" name="radio5" type="radio" onClick={e => this.setState({ bank: e.target.value, bankInput: false })} /> <img src={require('./cimb.jpg')} id="imgCard" alt="No pic" />
-                                                    <input className="ml-3" name="radio5" type="radio" onClick={e => this.setState({ bank: "", bankInput: true })} /> Other Bank
-                                                    {
-                                                        this.state.bankInput
-                                                            ?
-                                                            <input autoFocus className="ml-1" placeholder="bank name" style={{ borderRadius: "5px" }} onChange={e => this.setState({ bank: e.target.value })} />
-                                                            :
-                                                            null
-                                                    }
-                                                </p>
-                                                <table >
-                                                    <tr >
-                                                        <td >
-                                                            Account Name
-                                                        </td>
-                                                        <td >
-                                                            : <input id="accountName" style={{ borderRadius: "5px" }} onChange={e => this.setState({ accountName: e.target.value })} />
-                                                        </td>
-                                                    </tr>
-                                                    <tr >
-                                                        <td >
-                                                            Account Number
-                                                        </td>
-                                                        <td >
-                                                            : <NumberFormat format="#### #### #### ####" placeholder="#### #### #### ####" mask="_" decimalScale="0" allowNegative={false} style={{ borderRadius: "5px" }} value={this.state.accountNumber} onChange={e => this.setState({ accountNumber: e.target.value })} />
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </CardBody>
-                                            <CardFooter >
-                                                <Button onClick={() => this.addPayment("transfer")} >
                                                     Add
                                                     </Button>
                                             </CardFooter>

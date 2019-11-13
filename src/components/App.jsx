@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Route, BrowserRouter } from "react-router-dom";
 import { connect } from "react-redux";
+import axios from "axios";
 import { keepLogin, getData } from "../action/index"
 import { getCartLogin, getCartNonLogin, keepCart } from "../action/tran"
 
@@ -39,6 +40,7 @@ class App extends Component {
         let storage = JSON.parse(localStorage.getItem("userData"))
         let cart = JSON.parse(localStorage.getItem("cart"))
         let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
+        let checkout = localStorage.getItem("checkout")
         if (storage) {
             if (cartLogin) {
                 this.props.keepLogin(storage)
@@ -49,10 +51,50 @@ class App extends Component {
                 this.props.keepLogin(storage)
                 this.props.getData()
             }
+            if (checkout && cartLogin) {
+                localStorage.removeItem("checkout");
+                let y = cartLogin
+                for (let i = 0; i < y.length; i++) {
+                    axios.get("http://localhost:5555/tran/getcheckoutqty", {
+                        params: {
+                            productId: y[i].productId
+                        }
+                    })
+                        .then(res => {
+                            axios.put("http://localhost:5555/tran/changecheckoutqty", {
+                                productId: y[i].productId,
+                                checkoutqty: res.data[0].checkoutqty - y[i].qty
+                            })
+                                .then()
+                                .catch()
+                        })
+                        .catch()
+                }
+            }
         } else {
             if (cart) {
                 this.props.keepCart(cart)
                 this.props.getCartNonLogin()
+            }
+            if (checkout && cart) {
+                localStorage.removeItem("checkout");
+                let y = cart
+                for (let i = 0; i < y.length; i++) {
+                    axios.get("http://localhost:5555/tran/getcheckoutqty", {
+                        params: {
+                            productId: y[i].productId
+                        }
+                    })
+                        .then(res => {
+                            axios.put("http://localhost:5555/tran/changecheckoutqty", {
+                                productId: y[i].productId,
+                                checkoutqty: res.data[0].checkoutqty - y[i].qty
+                            })
+                                .then()
+                                .catch()
+                        })
+                        .catch()
+                }
             }
         }
         this.setState({ check: true })

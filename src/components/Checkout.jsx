@@ -8,31 +8,44 @@ import {
 } from 'reactstrap';
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
+import { emptyCart } from "../action/tran"
 
 class Checkout extends Component {
 
-    state = {
-        grandTotal: 0,
-        totalWeight: 0,
-        cost: [],
-        postalCode: "a",
-        totalDeliveryCost: 0,
-        userAdress: [],
-        address: "",
-        dataAddress: [],
-        userCitySelect: "",
-        userAddressSelect: {},
-        bank: "",
-        dataPayment: [],
-        userPayment: "",
-        userPaymentSelect: {},
-        paymentType: "",
-        nameOncard: "",
-        cardNumber: "",
-        cardExp: "",
-        securityCode: "",
-        backToCart: false,
-        email: "a"
+    constructor(props) {
+        super(props);
+        this.state = {
+            modal: false,
+            grandTotal: 0,
+            totalWeight: 0,
+            cost: [],
+            postalCode: "a",
+            totalDeliveryCost: 0,
+            userAdress: [],
+            address: "",
+            dataAddress: [],
+            userCitySelect: "",
+            userAddressSelect: {},
+            bank: "",
+            dataPayment: [],
+            userPayment: "",
+            userPaymentSelect: {},
+            paymentType: "",
+            nameOncard: "",
+            cardNumber: "",
+            cardExp: "",
+            securityCode: "",
+            backToCart: false,
+            email: "a",
+            recipientName: ""
+        };
+        this.toggle = this.toggle.bind(this);
+    }
+
+    toggle() {
+        this.setState(prevState => ({
+            modal: !prevState.modal
+        }));
     }
 
     componentDidMount() {
@@ -54,9 +67,8 @@ class Checkout extends Component {
                 this.modifyCheckout("minus")
                 this.setState({ backToCart: true })
             },
-            600000
-        )
-        localStorage.setItem("checkout", "been checkout");
+            60000
+        )    
     }
 
     modifyCheckout = (val) => {
@@ -71,6 +83,7 @@ class Checkout extends Component {
                     let z
                     if (val === "add") {
                         z = res.data[0].checkoutqty + y[i].qty
+                        localStorage.setItem("checkout", "been checkout");
                     } else {
                         z = res.data[0].checkoutqty - y[i].qty
                         localStorage.removeItem("checkout");
@@ -303,158 +316,182 @@ class Checkout extends Component {
                 this.modifyCheckout("minus")
                 this.setState({ backToCart: true })
             },
-            600000
+            60000
         )
     }
 
     placeOrder = () => {
-        let entry = {}
-        let dest_address, dest_district, dest_cityregency, dest_province, dest_postalcode
-        if (this.state.userAdress.length > 0) {
-            dest_address = this.state.address
-            dest_district = this.state.userAdress[0].district
-            dest_cityregency = this.state.userAdress[0].cityregency
-            dest_province = this.state.userAdress[0].province
-            dest_postalcode = this.state.postalCode
-        } else {
-            dest_address = this.state.userAddressSelect.user_address
-            dest_district = this.state.userAddressSelect.user_district
-            dest_cityregency = this.state.userAddressSelect.user_cityregency
-            dest_province = this.state.userAddressSelect.user_province
-            dest_postalcode = this.state.userAddressSelect.user_postalcode
-        }
-        entry = { ...entry, dest_address, dest_district, dest_cityregency, dest_province, dest_postalcode }
-        axios.post("http://localhost:5555/tran/addtrandelivery", entry)
-            .then(pos => {
-                let data = {}
-                let localUser = localStorage.getItem("localUser")
-                let userId, email, type, bankori, bankdest, name, number, expiry, securitycode, status
-                let trandate = []
-                let d = new Date()
-                let a = (d.getFullYear()).toString()
-                let b = d.getMonth() + 1
-                let c = d.getDate()
-                if (b < 10) { b = "0" + b }
-                if (c < 10) { c = "0" + c }
-                trandate.push(a)
-                trandate.push(b)
-                trandate.push(c)
-                trandate = trandate.join("")
-                let productcost = this.state.grandTotal
-                let deliverycost = this.state.totalDeliveryCost
-                let totalcost = this.state.totalDeliveryCost + this.state.grandTotal
-                if (this.props.loginRedux.length > 0) {
-                    userId = this.props.loginRedux[0].userId
-                    email = this.props.loginRedux[0].email
-                } else {
-                    userId = localUser
-                    email = this.state.email
-                }
-                switch (true) {
-                    case this.state.paymentType === "card":
-                        type = "card"
-                        bankori = this.state.bank
-                        name = this.state.nameOncard
-                        number = this.state.cardNumber
-                        expiry = this.state.cardExp
-                        securitycode = this.state.securityCode
-                        status = "payment done, waiting for the product(s) to be delivered"
-                        data = { ...data, trandate, userId, email, type, bankori, name, number, expiry, securitycode, productcost, deliverycost, totalcost, status }
-                        break;
-                    case this.state.paymentType === "transfer":
-                        type = "transfer"
-                        bankdest = this.state.bank
-                        status = "waiting for payment"
-                        data = { ...data, trandate, userId, email, type, bankdest, productcost, deliverycost, totalcost, status }
-                        break;
-                    default:
-                        type = this.state.userPaymentSelect.type
-                        bankori = this.state.userPaymentSelect.bank
-                        name = this.state.userPaymentSelect.name
-                        number = this.state.userPaymentSelect.number
-                        expiry = this.state.userPaymentSelect.expiry
-                        securitycode = this.state.userPaymentSelect.securitycode
-                        status = "payment done, waiting for the product(s) to be delivered"
-                        data = { ...data, trandate, userId, email, type, bankori, name, number, expiry, securitycode, productcost, deliverycost, totalcost, status }
-                        break;
-                }
-                axios.post("http://localhost:5555/tran/addtranpayment", data)
-                    .then(res => {
-                        let y = this.props.cartRedux
-                        for (let i = 0; i < y.length; i++) {
-                            let input = {}
-                            let tranpaymentId = res.data.insertId
-                            let trandeliveryId = pos.data.insertId
-                            let productId = y[i].productId
-                            let qty = y[i].qty
-                            let price = y[i].price
-                            let priceafterdisc
-                            let totalprice
-                            switch (true) {
-                                case y[i].discpercent === null && y[i].discvalue === null:
-                                    priceafterdisc = price
-                                    totalprice = priceafterdisc * qty
-                                    input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, priceafterdisc, totalprice }
-                                    break;
-                                case y[i].discpercent !== null && y[i].discvalue === null:
-                                    let discpercent = y[i].discpercent
-                                    priceafterdisc = price * (100 - discpercent) / 100
-                                    totalprice = priceafterdisc * qty
-                                    input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, discpercent, priceafterdisc, totalprice }
-                                    break;
-                                case y[i].discpercent === null && y[i].discvalue !== null:
-                                    let discvalue = y[i].discvalue
-                                    priceafterdisc = price - discvalue
-                                    totalprice = priceafterdisc * qty
-                                    input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, discvalue, priceafterdisc, totalprice }
-                                    break;
-                                default:
-                                    break;
-                            }
-                            axios.post("http://localhost:5555/tran/addtrandetail", input)
-                                .then()
-                                .catch()
-
-                            axios.get("http://localhost:5555/prod/getproductdetail", {
-                                params: {
-                                    productId: productId
+        try {
+            let entry = {}
+            let recipientname, dest_address, dest_district, dest_cityregency, dest_province, dest_postalcode
+            if (this.state.userAdress.length > 0) {
+                dest_address = this.state.address
+                dest_district = this.state.userAdress[0].district
+                dest_cityregency = this.state.userAdress[0].cityregency
+                dest_province = this.state.userAdress[0].province
+                dest_postalcode = this.state.postalCode
+            } else {
+                dest_address = this.state.userAddressSelect.user_address
+                dest_district = this.state.userAddressSelect.user_district
+                dest_cityregency = this.state.userAddressSelect.user_cityregency
+                dest_province = this.state.userAddressSelect.user_province
+                dest_postalcode = this.state.userAddressSelect.user_postalcode
+            }
+            if (this.props.loginRedux.length > 0) {
+                recipientname = this.props.loginRedux[0].fullname
+            } else {
+                recipientname = this.state.recipientName
+            }
+            if (!dest_address || dest_address === "") throw "insert delivery address"
+            if (this.props.loginRedux.length === 0 && this.state.recipientName === "") throw "insert recipient name"
+            if ((this.props.loginRedux.length === 0 && this.state.email === "a") || (this.props.loginRedux.length === 0 && this.state.email === false)) throw "insert your email"
+            if (!this.state.userPaymentSelect.type && this.state.paymentType === "") throw "insert payment"
+            if ((this.state.paymentType === "card" && this.state.nameOncard === "") || (this.state.paymentType === "card" && this.state.cardNumber === "") || (this.state.paymentType === "card" && this.state.cardExp === "") || (this.state.paymentType === "card" && this.state.securityCode === "")) throw "complete card data"
+            entry = { ...entry, recipientname, dest_address, dest_district, dest_cityregency, dest_province, dest_postalcode }
+            axios.post("http://localhost:5555/tran/addtrandelivery", entry)
+                .then(pos => {
+                    let data = {}
+                    let localUser = localStorage.getItem("localUser")
+                    let userId, email, type, bankori, bankdest, name, number, expiry, securitycode, status
+                    let trandate = []
+                    let d = new Date()
+                    let a = (d.getFullYear()).toString()
+                    let b = d.getMonth() + 1
+                    let c = d.getDate()
+                    if (b < 10) { b = "0" + b }
+                    if (c < 10) { c = "0" + c }
+                    trandate.push(a)
+                    trandate.push(b)
+                    trandate.push(c)
+                    trandate = trandate.join("")
+                    let productcost = this.state.grandTotal
+                    let deliverycost = this.state.totalDeliveryCost
+                    let totalcost = this.state.totalDeliveryCost + this.state.grandTotal
+                    if (this.props.loginRedux.length > 0) {
+                        userId = this.props.loginRedux[0].userId
+                        email = this.props.loginRedux[0].email
+                    } else {
+                        userId = localUser
+                        email = this.state.email
+                    }
+                    switch (true) {
+                        case this.state.paymentType === "card":
+                            type = "card"
+                            bankori = this.state.bank
+                            name = this.state.nameOncard
+                            number = this.state.cardNumber
+                            expiry = this.state.cardExp
+                            securitycode = this.state.securityCode
+                            status = "payment done, waiting for the product(s) to be delivered"
+                            data = { ...data, trandate, userId, email, type, bankori, name, number, expiry, securitycode, productcost, deliverycost, totalcost, status }
+                            break;
+                        case this.state.paymentType === "transfer":
+                            type = "transfer"
+                            bankdest = this.state.bank
+                            status = "waiting for payment"
+                            data = { ...data, trandate, userId, email, type, bankdest, productcost, deliverycost, totalcost, status }
+                            break;
+                        default:
+                            type = this.state.userPaymentSelect.type
+                            bankori = this.state.userPaymentSelect.bank
+                            name = this.state.userPaymentSelect.name
+                            number = this.state.userPaymentSelect.number
+                            expiry = this.state.userPaymentSelect.expiry
+                            securitycode = this.state.userPaymentSelect.securitycode
+                            status = "payment done, waiting for the product(s) to be delivered"
+                            data = { ...data, trandate, userId, email, type, bankori, name, number, expiry, securitycode, productcost, deliverycost, totalcost, status }
+                            break;
+                    }
+                    axios.post("http://localhost:5555/tran/addtranpayment", data)
+                        .then(res => {
+                            let y = this.props.cartRedux
+                            let checkLoop = []
+                            for (let i = 0; i < y.length; i++) {
+                                checkLoop.push("go")
+                                let input = {}
+                                let tranpaymentId = res.data.insertId
+                                let trandeliveryId = pos.data.insertId
+                                let productId = y[i].productId
+                                let qty = y[i].qty
+                                let price = y[i].price
+                                let priceafterdisc
+                                let totalprice
+                                switch (true) {
+                                    case y[i].discpercent === null && y[i].discvalue === null:
+                                        priceafterdisc = price
+                                        totalprice = priceafterdisc * qty
+                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, priceafterdisc, totalprice }
+                                        break;
+                                    case y[i].discpercent !== null && y[i].discvalue === null:
+                                        let discpercent = y[i].discpercent
+                                        priceafterdisc = price * (100 - discpercent) / 100
+                                        totalprice = priceafterdisc * qty
+                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, discpercent, priceafterdisc, totalprice }
+                                        break;
+                                    case y[i].discpercent === null && y[i].discvalue !== null:
+                                        let discvalue = y[i].discvalue
+                                        priceafterdisc = price - discvalue
+                                        totalprice = priceafterdisc * qty
+                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, discvalue, priceafterdisc, totalprice }
+                                        break;
+                                    default:
+                                        break;
                                 }
-                            })
-                                .then(res => {
-                                    axios.put("http://localhost:5555/prod/changeproductinventory", {
-                                        productId: productId,
-                                        inventory: res.data[0].inventory - qty,
-                                    })
-                                        .then()
-                                        .catch()
+                                axios.post("http://localhost:5555/tran/addtrandetail", input)
+                                    .then()
+                                    .catch()
+
+                                axios.get("http://localhost:5555/prod/getproductdetail", {
+                                    params: {
+                                        productId: productId
+                                    }
                                 })
-                                .catch()
-                        }
-                    })
-                    .catch()
-            })
-            .catch()
-        this.modifyCheckout("minus")
-        this.setState({ backToCart: true })
-        // hilangkan dari cart
+                                    .then(res => {
+                                        axios.put("http://localhost:5555/prod/changeproductinventory", {
+                                            productId: productId,
+                                            inventory: res.data[0].inventory - qty,
+                                        })
+                                            .then()
+                                            .catch()
+                                    })
+                                    .catch()
 
-        // kalo card
-        // langsung muncul notif di toko penjual
-        // kirim invoice
-
-        // kalo transfer
-        // user harus upload foto di sebuah menu
-        // admin harus approve dulu
-        // barulah muncul notif di toko penjual
-        // kirim invoice
-
-        // jika tidak login
-
-        // 4 macam status :
-        // waiting for payment
-        // payment done, waiting to be delivered
-        // delivered, waiting to be received by customer
-        // received by customer
+                                if (checkLoop.length === y.length) {
+                                    // hapus dari cart
+                                    this.modifyCheckout("minus")
+                                    this.setState({ modal: true })
+                                    let cart = JSON.parse(localStorage.getItem("cart"))
+                                    let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
+                                    switch (true) {
+                                        case cartLogin !== null:
+                                            for (let i = 0; i < this.props.cartRedux.length; i++) {
+                                                axios.delete("http://localhost:5555/tran/deletecart/" + this.props.cartRedux[i].cartId)
+                                                    .then()
+                                                    .catch()
+                                            }
+                                            this.props.emptyCart("cartLogin")
+                                            break;
+                                        case cart !== null:
+                                            for (let i = 0; i < this.props.cartRedux.length; i++) {
+                                                axios.delete("http://localhost:5555/tran/deletecartnonlogin/" + this.props.cartRedux[i].cartId)
+                                                    .then()
+                                                    .catch()
+                                            }
+                                            this.props.emptyCart("cart")
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                        })
+                        .catch()
+                })
+                .catch()
+        } catch (error) {
+            alert(error)
+            this.resetCountdown()
+        }
     }
 
     renderCart = () => {
@@ -585,6 +622,83 @@ class Checkout extends Component {
         return map
     }
 
+    renderModal = () => {
+        if (this.props.loginRedux.length > 0) {
+            return (
+                <Modal isOpen={this.state.modal}>
+                    {
+                        this.state.paymentType === "transfer"
+                            ?
+                            <ModalHeader style={{ backgroundColor: "#ffc61a" }}>Upload Bank Transfer Receipt Required</ModalHeader>
+                            :
+                            <ModalHeader style={{ backgroundColor: "#ffc61a" }}>Transaction Success</ModalHeader>
+                    }
+                    <ModalBody>
+                        {
+                            this.state.paymentType === "transfer"
+                                ?
+                                <p className="text-justify">
+                                    Please upload your <b >Bank Transfer Receipt</b> within 24 hours using this menu on the header :
+                                    <br></br>
+                                    <img src={require('./historylogin.png')} style={{ width: "300px", height: "300px", objectFit: "contain" }} alt="No pic" />
+                                    <br></br>
+                                    Thank you for shopping @SimpleStore.
+                                </p>
+                                :
+                                <p className="text-justify">
+                                    You can check your transaction status in this menu on the header :
+                                    <br></br>
+                                    <img src={require('./historylogin.png')} style={{ width: "300px", height: "300px", objectFit: "contain" }} alt="No pic" />
+                                    <br></br>
+                                    Thank you for shopping @SimpleStore.
+                                </p>
+                        }
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="secondary" href="/" >Close</Button>
+                    </ModalFooter>
+                </Modal>
+            )
+        } else {
+            return (
+                <Modal isOpen={this.state.modal}>
+                    {
+                        this.state.paymentType === "card"
+                            ?
+                            <ModalHeader style={{ backgroundColor: "#ffc61a" }}>Transaction Success</ModalHeader>
+                            :
+                            <ModalHeader style={{ backgroundColor: "#ffc61a" }}>Upload Bank Transfer Receipt Required</ModalHeader>
+                    }
+                    <ModalBody>
+                        {
+                            this.state.paymentType === "card"
+                                ?
+                                <p className="text-justify">
+                                    You can check your transaction status in this menu on the header :
+                                    <br></br>
+                                    <img src={require('./transtat.png')} style={{ width: "300px", height: "300px", objectFit: "contain" }} alt="No pic" />
+                                    <br></br>
+                                    Thank you for shopping @SimpleStore.
+                                 </p>
+                                :
+                                <p className="text-justify">
+                                    Please upload your <b >Bank Transfer Receipt</b> within 24 hours using this menu on the header :
+                                    <br></br>
+                                    <img src={require('./transtat.png')} style={{ width: "300px", height: "300px", objectFit: "contain" }} alt="No pic" />
+                                    <br></br>
+                                    Thank you for shopping @SimpleStore.
+                                </p>
+                        }
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="secondary" href="/" >Close</Button>
+                    </ModalFooter>
+                </Modal>
+            )
+        }
+
+    }
+
     render() {
         switch (true) {
             case this.state.backToCart:
@@ -592,6 +706,7 @@ class Checkout extends Component {
             case this.props.cartRedux.length > 0 && !this.props.homeRedux:
                 return (
                     <div className="mt-3" id="curtain2" style={{ marginLeft: "100px" }} >
+                        {this.renderModal()}
                         <h1 >Checkout</h1>
                         <p className="mb-1 mt-3" style={{ backgroundColor: "#ffc61a" }} >Product Cost</p>
                         <table className="table-bordered mb-2" >
@@ -644,6 +759,13 @@ class Checkout extends Component {
                                 }
                                 <Input id="address" style={{ width: "400px" }} disabled={!this.state.postalCode || this.state.postalCode === "a"} placeholder="Address (exp : JL.Roda No.3)" className="mb-3" onChange={e => { this.setState({ address: e.target.value }); this.resetCountdown() }} />
                                 {
+                                    this.props.loginRedux.length === 0
+                                        ?
+                                        <Input style={{ width: "400px" }} disabled={!this.state.postalCode || this.state.postalCode === "a"} placeholder="Name (exp : Ms Liza)" onChange={e => { this.setState({ recipientName: e.target.value }); this.resetCountdown() }} />
+                                        :
+                                        null
+                                }
+                                {
                                     this.state.dataAddress.length > 0
                                         ?
                                         <p className="mb-0" >or choose from your registered address(es) :</p>
@@ -694,7 +816,7 @@ class Checkout extends Component {
                                     </tbody>
                                 </table>
                                 <div >
-                                    <small>your product(s) will be arrive to your address within 3 working days</small>
+                                    <small>we are using <b >JNE regular service</b>, your product(s) will be arrive to your address within 3 working days</small>
                                 </div>
                             </div>
                         </Row>
@@ -744,7 +866,7 @@ class Checkout extends Component {
                                         ?
                                         <FormGroup>
                                             <Label for="exampleText">Insert your email :</Label>
-                                            <Input id="exampleText" invalid={!this.state.email} style={{ width: "300px" }} placeholder="E-mail" type="text" onBlur={e => this.handleBlurEmail(e.target.value)} />
+                                            <Input id="exampleText" invalid={!this.state.email} style={{ width: "300px" }} placeholder="E-mail" type="text" onChange={e => { this.handleBlurEmail(e.target.value); this.resetCountdown() }} />
                                             <FormFeedback onInvalid>Not a correct email format</FormFeedback>
                                         </FormGroup>
                                         :
@@ -769,7 +891,7 @@ class Checkout extends Component {
                                                         Name on card
                                                         </td>
                                                     <td >
-                                                        : <input disabled={this.state.paymentType === ""} id="name" style={{ borderRadius: "5px" }} onChange={e => { this.setState({ nameOncard: e.target.value }); this.resetCountdown() }} />
+                                                        : <input disabled={this.state.paymentType !== "card"} id="name" style={{ borderRadius: "5px" }} onChange={e => { this.setState({ nameOncard: e.target.value }); this.resetCountdown() }} />
                                                     </td>
                                                 </tr>
                                                 <tr >
@@ -777,7 +899,7 @@ class Checkout extends Component {
                                                         Card Number
                                                         </td>
                                                     <td >
-                                                        : <NumberFormat disabled={this.state.paymentType === ""} id="number" format="#### #### #### ####" placeholder="#### #### #### ####" mask="_" decimalScale="0" allowNegative={false} style={{ borderRadius: "5px" }} value={this.state.cardNumber} onChange={e => { this.setState({ cardNumber: e.target.value }); this.resetCountdown() }} />
+                                                        : <NumberFormat disabled={this.state.paymentType !== "card"} id="number" format="#### #### #### ####" placeholder="#### #### #### ####" mask="_" decimalScale="0" allowNegative={false} style={{ borderRadius: "5px" }} value={this.state.cardNumber} onChange={e => { this.setState({ cardNumber: e.target.value }); this.resetCountdown() }} />
                                                     </td>
                                                 </tr>
                                                 <tr >
@@ -785,7 +907,7 @@ class Checkout extends Component {
                                                         Card Expiry
                                                         </td>
                                                     <td >
-                                                        : <NumberFormat disabled={this.state.paymentType === ""} id="exp" format="##/##" placeholder="MM/YY" mask={['M', 'M', 'Y', 'Y']} decimalScale="0" allowNegative={false} style={{ width: "70px", borderRadius: "5px" }} value={this.state.cardExp} onChange={e => { this.setState({ cardExp: e.target.value }); this.resetCountdown() }} />
+                                                        : <NumberFormat disabled={this.state.paymentType !== "card"} id="exp" format="##/##" placeholder="MM/YY" mask={['M', 'M', 'Y', 'Y']} decimalScale="0" allowNegative={false} style={{ width: "70px", borderRadius: "5px" }} value={this.state.cardExp} onChange={e => { this.setState({ cardExp: e.target.value }); this.resetCountdown() }} />
                                                     </td>
                                                 </tr>
                                                 <tr >
@@ -793,7 +915,7 @@ class Checkout extends Component {
                                                         Security Code
                                                         </td>
                                                     <td >
-                                                        : <NumberFormat disabled={this.state.paymentType === ""} id="sec" placeholder="###" maxLength="3" decimalScale="0" allowNegative={false} style={{ width: "70px", borderRadius: "5px" }} value={this.state.securityCode} onChange={e => { this.setState({ securityCode: e.target.value }); this.resetCountdown() }} />
+                                                        : <NumberFormat disabled={this.state.paymentType !== "card"} id="sec" placeholder="###" maxLength="3" decimalScale="0" allowNegative={false} style={{ width: "70px", borderRadius: "5px" }} value={this.state.securityCode} onChange={e => { this.setState({ securityCode: e.target.value }); this.resetCountdown() }} />
                                                     </td>
                                                 </tr>
                                             </table>
@@ -900,6 +1022,12 @@ class Checkout extends Component {
                 )
             case this.props.cartRedux.length > 0 && this.props.homeRedux:
                 return <Redirect to="/" />
+            case this.state.modal:
+                return (
+                    <div className="mt-3" id="curtain2" style={{ marginLeft: "100px" }} >
+                        {this.renderModal()}
+                    </div>        
+                )
             default:
                 alert("your cart is empty")
                 return <Redirect to="/" />
@@ -918,4 +1046,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps)(Checkout)
+export default connect(mapStateToProps, { emptyCart })(Checkout)

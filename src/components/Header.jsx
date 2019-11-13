@@ -12,6 +12,7 @@ import {
     InputGroup, InputGroupAddon, Input, Button, FormGroup, Label, ListGroup, ListGroupItem, Badge
 } from 'reactstrap';
 import { connect } from "react-redux";
+import axios from "axios";
 import { login, logout } from "../action/index";
 
 
@@ -22,7 +23,8 @@ class Header extends Component {
         password: "",
         rememberMe: false,
         username: "",
-        renderpic: "images/userpics/nopic.png"
+        renderpic: "images/userpics/nopic.png",
+        userOrder: []
     }
 
     componentDidMount() {
@@ -34,6 +36,23 @@ class Header extends Component {
         }
         this.getCart()
     }
+
+    getUserOrder = () => {
+        let token = localStorage.getItem("token")
+        axios.get("http://localhost:5555/tran/getuserorder", {
+            params: {
+                storename: this.props.loginRedux[0].storename
+            },
+            headers: {
+                authorization: token
+            }
+        })
+            .then(res => {
+                this.setState({ userOrder: res.data })
+            })
+            .catch()
+    }
+
 
     handleClickRememberMe = () => {
         if (this.state.rememberMe) { this.setState({ rememberMe: false }) }
@@ -254,7 +273,6 @@ class Header extends Component {
                             </UncontrolledDropdown>
                             <UncontrolledPopover placement="bottom" trigger="legacy" target="TransactionStatus">
                                 <PopoverBody>
-                                    <Input placeholder="Buyer code" className="my-3" />
                                     <Input placeholder="Transaction code" className="my-3" />
                                     <Button href="/transactionstatus" className="btn-block my-3">
                                         Status

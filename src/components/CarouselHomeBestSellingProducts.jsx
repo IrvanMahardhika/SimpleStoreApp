@@ -11,23 +11,23 @@ import ItemsCarousel from 'react-items-carousel';
 import { Redirect } from "react-router-dom";
 
 
-class CarouselHomeNewProducts extends Component {
+class CarouselHomeBestSellingProducts extends Component {
 
     state = {
-        newProductList: [],
+        bestSellingProductList: [],
         activeItemIndex: 0,
         chevronWidth: 5,
         productId: false
     }
 
     componentDidMount() {
-        this.getNewProducts()
+        this.getBestSellingProducts()
     }
 
-    getNewProducts = () => {
-        axios.get("http://localhost:5555/prod/getnewproducts")
+    getBestSellingProducts = () => {
+        axios.get("http://localhost:5555/prod/getbestsellingproducts")
             .then(res => {
-                this.setState({ newProductList: res.data })
+                this.setState({ bestSellingProductList: res.data })
             })
             .catch()
     }
@@ -46,7 +46,7 @@ class CarouselHomeNewProducts extends Component {
     }
 
     renderNewProduct = () => {
-        let z = this.state.newProductList.map(val => {
+        let z = this.state.bestSellingProductList.map(val => {
             return (
                 <Card id="pointer" onClick={() => this.gotoProductDetail(val.productId)} className="border-warning d-inline-block p-0 mx-3" style={{ marginBottom: "5px", marginTop: "5px", fontSize: "12px" }}>
                     <CardImg className="m-1 mx-1" top style={{ width: "140px", height: "100px", objectFit: "contain" }} src={"http://localhost:5555/" + val.productpic1} alt="Card image cap" />
@@ -155,4 +155,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps)(CarouselHomeNewProducts)
+export default connect(mapStateToProps)(CarouselHomeBestSellingProducts)

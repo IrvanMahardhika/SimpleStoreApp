@@ -347,8 +347,6 @@ class Cart extends Component {
     }
 
     render() {
-        console.log(this.props.cartRedux);
-        
         if (this.props.cartRedux.length > 0 && !this.props.homeRedux ) {
             switch (true) {
                 case this.state.productId !== false:

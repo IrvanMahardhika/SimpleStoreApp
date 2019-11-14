@@ -37,7 +37,8 @@ class Checkout extends Component {
             securityCode: "",
             backToCart: false,
             email: "a",
-            recipientName: ""
+            recipientName: "",
+            cellphone: "a"
         };
         this.toggle = this.toggle.bind(this);
     }
@@ -68,7 +69,7 @@ class Checkout extends Component {
                 this.setState({ backToCart: true })
             },
             60000
-        )    
+        )
     }
 
     modifyCheckout = (val) => {
@@ -267,6 +268,12 @@ class Checkout extends Component {
         else { this.setState({ email: val }) }
     }
 
+    handleBlurCellphone = (val) => {
+        if (val === "") { this.setState({ cellphone: "a" }) }
+        else if (isNaN(val) === true || val.length < 11 || val.substr(0, 1) !== "0") { this.setState({ cellphone: false }) }
+        else { this.setState({ cellphone: val }) }
+    }
+
     handleCard = (val) => {
         this.setState({ paymentType: "card", bank: val, userPayment: "" })
 
@@ -344,6 +351,7 @@ class Checkout extends Component {
             }
             if (!dest_address || dest_address === "") throw "insert delivery address"
             if (this.props.loginRedux.length === 0 && this.state.recipientName === "") throw "insert recipient name"
+            if ((this.props.loginRedux.length === 0 && this.state.cellphone === "a") || (this.props.loginRedux.length === 0 && this.state.cellphone === false)) throw "insert recipient cellphone"
             if ((this.props.loginRedux.length === 0 && this.state.email === "a") || (this.props.loginRedux.length === 0 && this.state.email === false)) throw "insert your email"
             if (!this.state.userPaymentSelect.type && this.state.paymentType === "") throw "insert payment"
             if ((this.state.paymentType === "card" && this.state.nameOncard === "") || (this.state.paymentType === "card" && this.state.cardNumber === "") || (this.state.paymentType === "card" && this.state.cardExp === "") || (this.state.paymentType === "card" && this.state.securityCode === "")) throw "complete card data"
@@ -352,7 +360,7 @@ class Checkout extends Component {
                 .then(pos => {
                     let data = {}
                     let localUser = localStorage.getItem("localUser")
-                    let userId, email, type, bankori, bankdest, name, number, expiry, securitycode, status
+                    let userId, email, cellphone, type, bankori, bankdest, name, number, expiry, securitycode, status
                     let trandate = []
                     let d = new Date()
                     let a = (d.getFullYear()).toString()
@@ -370,9 +378,11 @@ class Checkout extends Component {
                     if (this.props.loginRedux.length > 0) {
                         userId = this.props.loginRedux[0].userId
                         email = this.props.loginRedux[0].email
+                        cellphone = this.props.loginRedux[0].cellphone
                     } else {
                         userId = localUser
                         email = this.state.email
+                        cellphone = this.state.cellphone
                     }
                     switch (true) {
                         case this.state.paymentType === "card":
@@ -383,13 +393,13 @@ class Checkout extends Component {
                             expiry = this.state.cardExp
                             securitycode = this.state.securityCode
                             status = "payment done, waiting for the product(s) to be delivered"
-                            data = { ...data, trandate, userId, email, type, bankori, name, number, expiry, securitycode, productcost, deliverycost, totalcost, status }
+                            data = { ...data, trandate, userId, email, cellphone, type, bankori, name, number, expiry, securitycode, productcost, deliverycost, totalcost, status }
                             break;
                         case this.state.paymentType === "transfer":
                             type = "transfer"
                             bankdest = this.state.bank
                             status = "waiting for payment"
-                            data = { ...data, trandate, userId, email, type, bankdest, productcost, deliverycost, totalcost, status }
+                            data = { ...data, trandate, userId, email, cellphone, type, bankdest, productcost, deliverycost, totalcost, status }
                             break;
                         default:
                             type = this.state.userPaymentSelect.type
@@ -399,7 +409,7 @@ class Checkout extends Component {
                             expiry = this.state.userPaymentSelect.expiry
                             securitycode = this.state.userPaymentSelect.securitycode
                             status = "payment done, waiting for the product(s) to be delivered"
-                            data = { ...data, trandate, userId, email, type, bankori, name, number, expiry, securitycode, productcost, deliverycost, totalcost, status }
+                            data = { ...data, trandate, userId, email, cellphone, type, bankori, name, number, expiry, securitycode, productcost, deliverycost, totalcost, status }
                             break;
                     }
                     axios.post("http://localhost:5555/tran/addtranpayment", data)
@@ -414,25 +424,26 @@ class Checkout extends Component {
                                 let productId = y[i].productId
                                 let qty = y[i].qty
                                 let price = y[i].price
+                                let note = y[i].note
                                 let priceafterdisc
                                 let totalprice
                                 switch (true) {
                                     case y[i].discpercent === null && y[i].discvalue === null:
                                         priceafterdisc = price
                                         totalprice = priceafterdisc * qty
-                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, priceafterdisc, totalprice }
+                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, priceafterdisc, totalprice, note }
                                         break;
                                     case y[i].discpercent !== null && y[i].discvalue === null:
                                         let discpercent = y[i].discpercent
                                         priceafterdisc = price * (100 - discpercent) / 100
                                         totalprice = priceafterdisc * qty
-                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, discpercent, priceafterdisc, totalprice }
+                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, discpercent, priceafterdisc, totalprice, note }
                                         break;
                                     case y[i].discpercent === null && y[i].discvalue !== null:
                                         let discvalue = y[i].discvalue
                                         priceafterdisc = price - discvalue
                                         totalprice = priceafterdisc * qty
-                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, discvalue, priceafterdisc, totalprice }
+                                        input = { ...input, tranpaymentId, trandeliveryId, productId, qty, price, discvalue, priceafterdisc, totalprice, note }
                                         break;
                                     default:
                                         break;
@@ -450,6 +461,7 @@ class Checkout extends Component {
                                         axios.put("http://localhost:5555/prod/changeproductinventory", {
                                             productId: productId,
                                             inventory: res.data[0].inventory - qty,
+                                            sales: res.data[0].sales + qty
                                         })
                                             .then()
                                             .catch()
@@ -761,7 +773,17 @@ class Checkout extends Component {
                                 {
                                     this.props.loginRedux.length === 0
                                         ?
-                                        <Input style={{ width: "400px" }} disabled={!this.state.postalCode || this.state.postalCode === "a"} placeholder="Name (exp : Ms Liza)" onChange={e => { this.setState({ recipientName: e.target.value }); this.resetCountdown() }} />
+                                        <Input style={{ width: "400px" }} disabled={!this.state.postalCode || this.state.postalCode === "a"} placeholder="Name (exp : Ms Liza)" className="mb-3" onChange={e => { this.setState({ recipientName: e.target.value }); this.resetCountdown() }} />
+                                        :
+                                        null
+                                }
+                                {
+                                    this.props.loginRedux.length === 0
+                                        ?
+                                        <FormGroup>
+                                            <Input style={{ width: "400px" }} disabled={!this.state.postalCode || this.state.postalCode === "a"} invalid={!this.state.cellphone} placeholder="Cellphone"  onChange={e => { this.handleBlurCellphone(e.target.value); this.resetCountdown() }} />
+                                            <FormFeedback onInvalid>Please type a correct cellphone number</FormFeedback>      
+                                        </FormGroup>
                                         :
                                         null
                                 }
@@ -1026,7 +1048,7 @@ class Checkout extends Component {
                 return (
                     <div className="mt-3" id="curtain2" style={{ marginLeft: "100px" }} >
                         {this.renderModal()}
-                    </div>        
+                    </div>
                 )
             default:
                 alert("your cart is empty")

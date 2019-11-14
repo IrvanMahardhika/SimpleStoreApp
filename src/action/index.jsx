@@ -61,31 +61,31 @@ export const login = (keyword, password, rememberMe) => {
                 axios.post("http://localhost:5555/auth/gettoken", {
                     username: res.data[0].username
                 })
-                    .then(res => {
-                        localStorage.setItem("token", res.data.token);
+                    .then(pos => {
+                        localStorage.setItem("token", pos.data.token);
                         axios.get("http://localhost:5555/tran/getcart", {
                             params: {
                                 userId: z
                             },
                             headers: {
-                                authorization: res.data.token
+                                authorization: pos.data.token
                             }
                         })
-                            .then(res => {
-                                if (res.data.length > 0) {
+                            .then(nex => {
+                                if (nex.data.length > 0) {
                                     localStorage.setItem(
                                         "cartLogin",
-                                        JSON.stringify(res.data)
+                                        JSON.stringify(nex.data)
                                     )
                                     let z = 0
-                                    for (let i = 0; i < res.data.length; i++) {
-                                        z += parseInt(res.data[i].qty)
+                                    for (let i = 0; i < nex.data.length; i++) {
+                                        z += parseInt(nex.data[i].qty)
                                     }
                                     dispatch(
                                         {
                                             type: "GET_CART",
                                             payload: {
-                                                cart: res.data,
+                                                cart: nex.data,
                                                 cartQty: z
                                             }
                                         }
@@ -99,6 +99,39 @@ export const login = (keyword, password, rememberMe) => {
                                 }
                             })
                             .catch()
+                        
+                        if (res.data[0].storeapproval === 1) {
+                            axios.get("http://localhost:5555/tran/getuserorder", {
+                                params: {
+                                    storename: res.data[0].storename
+                                },
+                                headers: {
+                                    authorization: pos.data.token
+                                }
+                            })
+                                .then(nex => {
+                                    if (nex.data.length > 0) {
+                                        localStorage.setItem(
+                                            "userOrder",
+                                            JSON.stringify(nex.data)
+                                        )
+                                        let z = 0
+                                        for (let i = 0; i < nex.data.length; i++) {
+                                            z += nex.data[i].qty
+                                        }
+                                        dispatch(
+                                            {
+                                                type: "GET_USER_ORDER",
+                                                payload: {
+                                                    userOrder: nex.data,
+                                                    userOrderQty: z
+                                                }
+                                            }
+                                        )
+                                    }
+                                })
+                                .catch()
+                        }
                     })
                     .catch()
                 dispatch(
@@ -120,6 +153,7 @@ export const keepLogin = (val) => {
 
 export const logout = () => {
     return (dispatch) => {
+        localStorage.removeItem("userOrder");
         localStorage.removeItem("userData");
         localStorage.removeItem("token");
         localStorage.removeItem("setproductId");
@@ -132,6 +166,11 @@ export const logout = () => {
         dispatch(
             {
                 type: "EMPTY_CART"
+            }
+        )
+        dispatch(
+            {
+                type: "EMPTY_USER_ORDER"
             }
         )
         alert("Logout Success.");

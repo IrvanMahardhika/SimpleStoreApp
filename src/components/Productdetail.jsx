@@ -251,6 +251,14 @@ class Productdetail extends Component {
                                         }
                                         <tr >
                                             <td className="p-2" >
+                                                Sold
+                                            </td>
+                                            <td className="p-2" style={{ fontSize: "20px" }} >
+                                                {this.state.productDetail[0].sales === null ? 0 : this.state.productDetail[0].sales} {this.state.productDetail[0].measurement}
+                                            </td>
+                                        </tr>
+                                        <tr >
+                                            <td className="p-2" >
                                                 Remaining Stock
                                             </td>
                                             <td className="p-2" style={{ fontSize: "20px" }} >
@@ -323,7 +331,7 @@ class Productdetail extends Component {
 
                                             </td>
                                             <td className="p-2 text-center  " >
-                                                <Button disabled={this.state.qty === ""} onClick={() => this.addTocart()} >
+                                                <Button disabled={this.state.qty === "" || this.state.productDetail[0].inventory < 1} onClick={() => this.addTocart()} >
                                                     Add to Cart
                                                 </Button>
                                                 <Button href="/Cart" className="ml-3 bg-white" id="buttonImg">

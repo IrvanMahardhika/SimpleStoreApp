@@ -11,6 +11,7 @@ import {headerSearchbox} from "../action/index"
 import Carouselhome from "./Carouselhome"
 import Modalhome from "./Modalhome";
 import CarouselHomeNewProducts from "./CarouselHomeNewProducts"
+import CarouselHomeBestSellingProducts from "./CarouselHomeBestSellingProducts"
   
 class Home extends Component {
 
@@ -32,6 +33,10 @@ class Home extends Component {
 
     renderCarouselHomeNewProducts = () => {
         return <CarouselHomeNewProducts />
+    }
+
+    renderCarouselHomeBestSellingProducts = () => {
+        return <CarouselHomeBestSellingProducts />
     }
 
     render () {
@@ -56,6 +61,12 @@ class Home extends Component {
                 <p className="h5 my-1" style={{color:"#737373"}}>New Products</p>
                 <div id="curtain2" >
                     {this.renderCarouselHomeNewProducts()}
+                </div>
+
+                <br></br>
+                <p className="h5 my-1" style={{color:"#737373"}}>Best Selling Products</p>
+                <div id="curtain2" >
+                    {this.renderCarouselHomeBestSellingProducts()}
                 </div>
             </div>
         );

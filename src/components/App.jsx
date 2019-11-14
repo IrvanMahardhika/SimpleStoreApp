@@ -3,7 +3,7 @@ import { Route, BrowserRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import axios from "axios";
 import { keepLogin, getData } from "../action/index"
-import { getCartLogin, getCartNonLogin, keepCart } from "../action/tran"
+import { getCartLogin, getCartNonLogin, keepCart, getUserOrder, keepUserOrder } from "../action/tran"
 
 import Home from "./Home"
 import Register from "./Register"
@@ -20,6 +20,8 @@ import Markdown from "./Markdown"
 import Productdetail from "./Productdetail"
 import Cart from "./Cart"
 import Checkout from "./Checkout"
+import Userorder from "./Userorder"
+import Storetranhistory from "./Storetranhistory"
 
 
 class App extends Component {
@@ -40,16 +42,18 @@ class App extends Component {
         let storage = JSON.parse(localStorage.getItem("userData"))
         let cart = JSON.parse(localStorage.getItem("cart"))
         let cartLogin = JSON.parse(localStorage.getItem("cartLogin"))
+        let userOrder = JSON.parse(localStorage.getItem("userOrder"))
         let checkout = localStorage.getItem("checkout")
         if (storage) {
+            this.props.keepLogin(storage)
+            this.props.getData()
+            if (userOrder) {
+                this.props.keepUserOrder(userOrder)
+                this.props.getUserOrder()
+            }
             if (cartLogin) {
-                this.props.keepLogin(storage)
-                this.props.getData()
                 this.props.keepCart(cartLogin)
                 this.props.getCartLogin()
-            } else {
-                this.props.keepLogin(storage)
-                this.props.getData()
             }
             if (checkout && cartLogin) {
                 localStorage.removeItem("checkout");
@@ -119,6 +123,8 @@ class App extends Component {
                     <Route path="/Productdetail/:id" component={Productdetail} />
                     <Route path="/Cart" component={Cart} />
                     <Route path="/Checkout" component={Checkout} />
+                    <Route path="/Userorder" component={Userorder} />
+                    <Route path="/Storetranhistory" component={Storetranhistory} />
                 </BrowserRouter>
             )
         } else {
@@ -132,4 +138,4 @@ class App extends Component {
     }
 }
 
-export default connect(null, { keepLogin, getData, getCartLogin, getCartNonLogin, keepCart })(App)
+export default connect(null, { keepLogin, getData, getCartLogin, getCartNonLogin, keepCart, getUserOrder, keepUserOrder })(App)

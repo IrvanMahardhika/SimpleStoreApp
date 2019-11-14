@@ -7,7 +7,9 @@ const init = {
     user: [],
     cart: [],
     cartQty: 0,
-    home: false
+    home: false,
+    userOrder: [],
+    userOrderQty: 0
 }
 
 const checkReducer = (state = init, action) => {
@@ -70,6 +72,17 @@ const homeReducer = (state = init, action) => {
     }
 }
 
+const tranReducer = (state = init, action) => {
+    switch (action.type) {
+        case "GET_USER_ORDER":
+            return { ...state, userOrder: action.payload.userOrder, userOrderQty: action.payload.userOrderQty }
+        case "EMPTY_USER_ORDER":
+            return { ...state, userOrder: [], userOrderQty: 0 }
+        default:
+            return state
+    }
+}
+
 const reducers = combineReducers(
     {
         check: checkReducer,
@@ -77,7 +90,8 @@ const reducers = combineReducers(
         register: registerReducer,
         location: locationReducer,
         cart: cartReducer,
-        home: homeReducer
+        home: homeReducer,
+        tran: tranReducer
     }
 )
 

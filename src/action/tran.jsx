@@ -86,3 +86,54 @@ export const emptyCart = (cart) => {
         type: "EMPTY_CART"
     }
 }
+
+export const getUserOrder = () => {
+    let storage = JSON.parse(localStorage.getItem("userData"))
+    let token = localStorage.getItem("token")
+    return (dispatch) => {
+        axios.get("http://localhost:5555/tran/getuserorder", {
+            params: {
+                storename: storage[0].storename
+            },
+            headers: {
+                authorization: token
+            }
+        })
+            .then(res => {
+                if (res.data.length > 0) {
+                    localStorage.setItem(
+                        "userOrder",
+                        JSON.stringify(res.data)
+                    )
+                    let z = 0
+                    for (let i = 0; i < res.data.length; i++) {
+                        z += res.data[i].qty
+                    }
+                    dispatch(
+                        {
+                            type: "GET_USER_ORDER",
+                            payload: {
+                                userOrder: res.data,
+                                userOrderQty: z
+                            }
+                        }
+                    )
+                }
+            })
+            .catch()    
+    }
+}
+
+export const keepUserOrder = (userOrder) => {
+    let z = 0
+    for (let i = 0; i < userOrder.length; i++) {
+        z += parseInt(userOrder[i].qty)
+    }
+    return {
+        type: "GET_USER_ORDER",
+        payload: {
+            userOrder: userOrder,
+            userOrderQty: z
+        }
+    }
+}

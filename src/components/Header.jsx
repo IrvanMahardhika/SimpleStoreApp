@@ -23,8 +23,7 @@ class Header extends Component {
         password: "",
         rememberMe: false,
         username: "",
-        renderpic: "images/userpics/nopic.png",
-        userOrder: []
+        renderpic: "images/userpics/nopic.png"
     }
 
     componentDidMount() {
@@ -34,23 +33,6 @@ class Header extends Component {
         } else {
             this.setState({ username: "" })
         }
-        this.getCart()
-    }
-
-    getUserOrder = () => {
-        let token = localStorage.getItem("token")
-        axios.get("http://localhost:5555/tran/getuserorder", {
-            params: {
-                storename: this.props.loginRedux[0].storename
-            },
-            headers: {
-                authorization: token
-            }
-        })
-            .then(res => {
-                this.setState({ userOrder: res.data })
-            })
-            .catch()
     }
 
 
@@ -93,14 +75,16 @@ class Header extends Component {
                         </UncontrolledDropdown>
                         <UncontrolledPopover disabled={this.props.loginRedux[0].storeapproval === 0} placement="bottom" trigger="legacy" target="Store">
                             <PopoverHeader>
-                                <Button className="">
-                                    User Order <Badge style={{ backgroundColor: "#ffc61a" }}>0</Badge>
+                                <Button href="/Userorder" className="">
+                                    User Order <Badge style={{ backgroundColor: "#ffc61a", color: "black" }}>{this.props.userOrderQtyRedux ? this.props.userOrderQtyRedux : 0}</Badge>
                                 </Button>
                             </PopoverHeader>
                             <PopoverBody>
                                 <ListGroup flush>
                                     <ListGroupItem tag="button" action>Check Store</ListGroupItem>
-                                    <ListGroupItem tag="button" action>Statistic</ListGroupItem>
+                                    <ListGroupItem tag="button" action>
+                                        <a href="/Storetranhistory">History</a>
+                                    </ListGroupItem>
                                 </ListGroup>
                                 <div className="row mt-2">
                                     <div className="col-8 pr-0">
@@ -122,19 +106,6 @@ class Header extends Component {
                         </NavLink>
                     </NavItem>
                 )
-        }
-    }
-
-    getCart = () => {
-        let z = 0
-        let cart = JSON.parse(localStorage.getItem("cart"))
-        if (cart) {
-            this.setState({ cart: cart })
-
-            for (let i = 0; i < cart.length; i++) {
-                z += cart[i].qty
-            }
-            this.setState({ cartQty: z })
         }
     }
 
@@ -375,7 +346,8 @@ const mapStateToProps = state => {
     return {
         check: state.check.check,
         loginRedux: state.login.user,
-        cartQtyRedux: state.cart.cartQty
+        cartQtyRedux: state.cart.cartQty,
+        userOrderQtyRedux: state.tran.userOrderQty
     }
 }
 

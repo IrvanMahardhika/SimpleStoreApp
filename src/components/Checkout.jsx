@@ -38,7 +38,8 @@ class Checkout extends Component {
             backToCart: false,
             email: "a",
             recipientName: "",
-            cellphone: "a"
+            cellphone: "a",
+            transactionId: ""
         };
         this.toggle = this.toggle.bind(this);
     }
@@ -68,7 +69,7 @@ class Checkout extends Component {
                 this.modifyCheckout("minus")
                 this.setState({ backToCart: true })
             },
-            60000
+            600000
         )
     }
 
@@ -323,7 +324,7 @@ class Checkout extends Component {
                 this.modifyCheckout("minus")
                 this.setState({ backToCart: true })
             },
-            60000
+            600000
         )
     }
 
@@ -358,6 +359,7 @@ class Checkout extends Component {
             entry = { ...entry, recipientname, dest_address, dest_district, dest_cityregency, dest_province, dest_postalcode }
             axios.post("http://localhost:5555/tran/addtrandelivery", entry)
                 .then(pos => {
+                    this.setState({ transactionId: pos.data.insertId })
                     let data = {}
                     let localUser = localStorage.getItem("localUser")
                     let userId, email, cellphone, type, bankori, bankdest, name, number, expiry, securitycode, status
@@ -650,6 +652,8 @@ class Checkout extends Component {
                             this.state.paymentType === "transfer"
                                 ?
                                 <p className="text-justify">
+                                    Your transaction id is <b >{this.state.transactionId}</b>
+                                    <br ></br>
                                     Please upload your <b >Bank Transfer Receipt</b> within 24 hours using this menu on the header :
                                     <br></br>
                                     <img src={require('./historylogin.png')} style={{ width: "300px", height: "300px", objectFit: "contain" }} alt="No pic" />
@@ -658,6 +662,8 @@ class Checkout extends Component {
                                 </p>
                                 :
                                 <p className="text-justify">
+                                    Your transaction id is <b >{this.state.transactionId}</b>
+                                    <br ></br>
                                     You can check your transaction status in this menu on the header :
                                     <br></br>
                                     <img src={require('./historylogin.png')} style={{ width: "300px", height: "300px", objectFit: "contain" }} alt="No pic" />
@@ -686,6 +692,8 @@ class Checkout extends Component {
                             this.state.paymentType === "card"
                                 ?
                                 <p className="text-justify">
+                                    Your transaction id is <b >{this.state.transactionId}</b>
+                                    <br ></br>
                                     You can check your transaction status in this menu on the header :
                                     <br></br>
                                     <img src={require('./transtat.png')} style={{ width: "300px", height: "300px", objectFit: "contain" }} alt="No pic" />
@@ -694,6 +702,8 @@ class Checkout extends Component {
                                  </p>
                                 :
                                 <p className="text-justify">
+                                    Your transaction id is <b >{this.state.transactionId}</b>
+                                    <br ></br>
                                     Please upload your <b >Bank Transfer Receipt</b> within 24 hours using this menu on the header :
                                     <br></br>
                                     <img src={require('./transtat.png')} style={{ width: "300px", height: "300px", objectFit: "contain" }} alt="No pic" />
@@ -781,8 +791,8 @@ class Checkout extends Component {
                                     this.props.loginRedux.length === 0
                                         ?
                                         <FormGroup>
-                                            <Input style={{ width: "400px" }} disabled={!this.state.postalCode || this.state.postalCode === "a"} invalid={!this.state.cellphone} placeholder="Cellphone"  onChange={e => { this.handleBlurCellphone(e.target.value); this.resetCountdown() }} />
-                                            <FormFeedback onInvalid>Please type a correct cellphone number</FormFeedback>      
+                                            <Input style={{ width: "400px" }} disabled={!this.state.postalCode || this.state.postalCode === "a"} invalid={!this.state.cellphone} placeholder="Cellphone" onChange={e => { this.handleBlurCellphone(e.target.value); this.resetCountdown() }} />
+                                            <FormFeedback onInvalid>Please type a correct cellphone number</FormFeedback>
                                         </FormGroup>
                                         :
                                         null

@@ -23,7 +23,10 @@ class Userorder extends Component {
             productName: "",
             tranpaymentId: "",
             trandeliveryId: "",
-            JNEreceiptCode: ""
+            name: "",
+            email: "",
+            JNEreceiptCode: "",
+            wholeContent: {}
         };
         this.toggleNote = this.toggleNote.bind(this);
     }
@@ -44,8 +47,8 @@ class Userorder extends Component {
         this.setState({ showProduct: id })
     }
 
-    showEntryJNE = (trandeliveryId, tranpaymentId) => {
-        this.setState({ modalJNE: true, trandeliveryId: trandeliveryId, tranpaymentId: tranpaymentId })
+    showEntryJNE = (trandeliveryId, tranpaymentId, name, email, wholeContent) => {
+        this.setState({ modalJNE: true, trandeliveryId: trandeliveryId, tranpaymentId: tranpaymentId, name: name, email: email, wholeContent: wholeContent })
     }
 
     showNote = (note, brand, name) => {
@@ -80,6 +83,26 @@ class Userorder extends Component {
         })
             .then()
             .catch()
+        axios.get("http://localhost:5555/mail/sendinvoiceemail", {
+            params: {
+                trandeliveryId: this.state.trandeliveryId,
+                storename: this.state.wholeContent.storename,
+                fullname: this.state.name,
+                address: this.state.wholeContent.dest_address,
+                district: this.state.wholeContent.dest_district,
+                cityregency: this.state.wholeContent.dest_cityregency,
+                province: this.state.wholeContent.dest_province,
+                postalcode: this.state.wholeContent.dest_postalcode,
+                productcost: this.state.wholeContent.productcost,
+                deliverycost: this.state.wholeContent.deliverycost,
+                totalcost: this.state.wholeContent.totalcost,
+                date: this.state.wholeContent.tranconfirmdate,
+                email: this.state.email
+            }
+        }).then(res => {
+            console.log(this.state.email);
+            
+        }).catch();
     }
 
     renderModalNote = () => {
@@ -152,16 +175,16 @@ class Userorder extends Component {
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_province}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_postalcode}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.productcost} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.productcost} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.deliverycost} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.deliverycost} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
                         <Button className="mr-1" style={{ fontSize: "12px", width: "60px" }} size="sm" onClick={() => this.showProduct(val.trandeliveryId)} >
                             Show Product
                             </Button>
-                        <Button style={{ fontSize: "12px", width: "60px" }} size="sm" onClick={() => this.showEntryJNE(val.trandeliveryId, val.tranpaymentId)} >
+                        <Button style={{ fontSize: "12px", width: "60px" }} size="sm" onClick={() => this.showEntryJNE(val.trandeliveryId, val.tranpaymentId, val.recipientname, val.email, val)} >
                             Entry JNE
                             </Button>
                     </td>
@@ -179,18 +202,18 @@ class Userorder extends Component {
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.brand}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.name}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.price} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.discpercent}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.discvalue} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.priceafterdisc} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.priceafterdisc} displayType={'text'} thousandSeparator={true} />
                     </td>
-                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.qty}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.qty} {val.measurement}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.totalprice} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.totalprice} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
                         <Button className="mr-1" style={{ fontSize: "12px" }} size="sm" onClick={() => this.showNote(val.note, val.brand, val.name)} >
@@ -204,6 +227,8 @@ class Userorder extends Component {
     }
 
     render() {
+        console.log(this.props.userOrderRedux);
+        
         switch (true) {
             case this.props.userOrderRedux.length > 0 && !this.props.homeRedux:
                 return (
@@ -238,11 +263,11 @@ class Userorder extends Component {
                         </table>
                         {
                             !this.state.showProduct
-                            ?
-                            null:
-                            <p className="mb-1" >
-                                List Product for transaction id {this.state.showProduct}
-                            </p>
+                                ?
+                                null :
+                                <p className="mb-1" >
+                                    List Product for transaction id {this.state.showProduct}
+                                </p>
                         }
                         {
                             !this.state.showProduct
@@ -255,7 +280,7 @@ class Userorder extends Component {
                                         <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Brand</td>
                                         <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Name</td>
                                         <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Price</td>
-                                        <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Disc Percent</td>
+                                        <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Disc Percent (%)</td>
                                         <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Disc Value</td>
                                         <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Price After Disc</td>
                                         <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Qty</td>

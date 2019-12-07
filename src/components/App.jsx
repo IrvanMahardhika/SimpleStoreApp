@@ -22,6 +22,8 @@ import Cart from "./Cart"
 import Checkout from "./Checkout"
 import Userorder from "./Userorder"
 import Storetranhistory from "./Storetranhistory"
+import Adminmenu from "./Adminmenu"
+import Test from "./test"
 
 
 class App extends Component {
@@ -112,7 +114,7 @@ class App extends Component {
                     <Route path="/" exact component={Home} />
                     <Route path="/Register" component={Register} />
                     <Route path="/Login" component={Login} />
-                    <Route path="/Transactionstatus" component={Transtat} />
+                    <Route path="/Transactionstatus/:id" component={Transtat} />
                     <Route path="/Startselling" component={Startsell} />
                     <Route path="/Forgotpasswordstart" component={Forgotpasswordstart} />
                     <Route path="/Forgotpasswordend/:userId" component={Forgotpasswordend} />
@@ -125,6 +127,8 @@ class App extends Component {
                     <Route path="/Checkout" component={Checkout} />
                     <Route path="/Userorder" component={Userorder} />
                     <Route path="/Storetranhistory" component={Storetranhistory} />
+                    <Route path="/Adminmenu/:id" component={Adminmenu} />
+                    <Route path="/Test" component={Test} />
                 </BrowserRouter>
             )
         } else {

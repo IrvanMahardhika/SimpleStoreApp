@@ -60,8 +60,6 @@ class Storetranhistory extends Component {
         })
             .then(res => {
                 if (res.data.length > 0) {
-                    console.log(res.data);
-                    
                     let incompleteTransaction = res.data.filter(val => val.status === "delivered, waiting to be received by customer")
                     let claimCompleteTransaction = res.data.filter(val => val.status === "received claim, waiting for admin approval")
                     let completedTransaction = res.data.filter(val => val.status === "received by customer (transaction complete)")
@@ -163,7 +161,7 @@ class Storetranhistory extends Component {
                         <br></br>
                         If the customer truly has received the product, then the transaction status will be changed into <b >received by customer (transaction complete)</b>.
                     </p>
-                    <img className="border" src={"http://localhost:5555/" + this.state.renderpic} style={{ height: "250px", width: "250px", objectFit: "cover" }} alt="No pic" />
+                    <img className="border" src={"http://localhost:5555/" + this.state.renderpic} style={{ height: "250px", width: "450px", objectFit: "contain" }} alt="No pic" />
                     <p className="mb-1" >
                         <small>pic size max 200kb</small>
                     </p>
@@ -209,10 +207,10 @@ class Storetranhistory extends Component {
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_province}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_postalcode}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.productcost} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.productcost} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.deliverycost} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.deliverycost} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center" style={{ fontSize: "12px" }} >
                         <Button className="d-block mb-1" style={{ fontSize: "12px", width: "60px" }} size="sm" onClick={() => this.showProduct(val.trandeliveryId)} >
@@ -258,10 +256,59 @@ class Storetranhistory extends Component {
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_province}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_postalcode}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.productcost} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.productcost} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.deliverycost} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.deliverycost} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    <td className="p-2 text-center" style={{ fontSize: "12px" }} >
+                        <Button className="d-block mb-1" style={{ fontSize: "12px", width: "60px" }} size="sm" onClick={() => this.showProduct(val.trandeliveryId)} >
+                            Show Product
+                            </Button>
+                        <Button className="d-block" style={{ fontSize: "12px", width: "60px" }} size="sm" onClick={() => this.showEntryReceivingEvidence(val.trandeliveryId, val.tranpaymentId)} >
+                            Show Delivery Proof
+                            </Button>
+                    </td>
+                </tr>
+            )
+        })
+        return map
+    }
+
+    renderCompletedTransaction = () => {
+        let z = []
+        let y = this.state.completedTransaction
+        for (let i = 0; i < y.length; i++) {
+            if (i === 0) {
+                z.push(y[i])
+            }
+            if (i > 0 && y[i].trandeliveryId !== y[i - 1].trandeliveryId) {
+                z.push(y[i])
+            }
+        }
+        let map = z.map((val, index) => {
+            return (
+                <tr className={val.trandeliveryId === this.state.showProduct ? "bg-warning" : ""} >
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{index + 1}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
+                        {new Date(val.tranconfirmdate).toLocaleDateString("id", { day: "numeric", month: "short", year: "numeric" })}
+                    </td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
+                        {new Date(val.jnereceiptdate).toLocaleDateString("id", { day: "numeric", month: "short", year: "numeric" })}
+                    </td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.trandeliveryId}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.recipientname}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.cellphone}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_address}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_district}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_cityregency}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_province}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.dest_postalcode}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
+                        <NumberFormat prefix="IDR " value={val.productcost} displayType={'text'} thousandSeparator={true} />
+                    </td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
+                        <NumberFormat prefix="IDR " value={val.deliverycost} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center" style={{ fontSize: "12px" }} >
                         <Button className="d-block mb-1" style={{ fontSize: "12px", width: "60px" }} size="sm" onClick={() => this.showProduct(val.trandeliveryId)} >
@@ -285,18 +332,18 @@ class Storetranhistory extends Component {
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.brand}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.name}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.price} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.price} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.discpercent}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.discvalue} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.discvalue} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.priceafterdisc} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.priceafterdisc} displayType={'text'} thousandSeparator={true} />
                     </td>
-                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.qty}</td>
+                    <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >{val.qty} {val.measurement}</td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
-                        <NumberFormat value={val.totalprice} displayType={'text'} thousandSeparator={true} />
+                        <NumberFormat prefix="IDR " value={val.totalprice} displayType={'text'} thousandSeparator={true} />
                     </td>
                     <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >
                         <Button className="mr-1" style={{ fontSize: "12px" }} size="sm" onClick={() => this.showNote(val.note, val.brand, val.name)} >
@@ -311,8 +358,6 @@ class Storetranhistory extends Component {
 
 
     render() {
-        console.log(this.state.claimCompleteTransaction);
-        
         if (this.props.loginRedux.length > 0) {
             if (this.props.loginRedux[0].storeapproval === 1 && !this.props.homeRedux) {
                 return (
@@ -366,6 +411,30 @@ class Storetranhistory extends Component {
                             </thead>
                             <tbody>
                                 {this.renderClaimCompleteTransaction()}
+                            </tbody>
+                        </table>
+                        <p className="mb-1" >
+                            Status : received by customer (transaction complete)
+                        </p>
+                        <table className="table-bordered mb-5" style={{ width: "1200px" }} >
+                            <thead style={{ backgroundColor: "#ffc61a" }} className="font-weight-bold">
+                                <td></td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Payment Date</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Delivery Date</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Tran Id</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Name</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Cellphone</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Address</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >District</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >City/Regency</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Province</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Postalcode</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Product Cost</td>
+                                <td className="p-2 text-center align-text-top" style={{ fontSize: "12px" }} >Delivery Cost</td>
+                                <td className="p-2 text-center align-text-top" ></td>
+                            </thead>
+                            <tbody>
+                                {this.renderCompletedTransaction()}
                             </tbody>
                         </table>
                         {

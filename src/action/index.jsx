@@ -1,4 +1,5 @@
 import axios from "axios";
+var crypto = require("crypto")
 
 export const headerChange = () => {
     return {
@@ -13,97 +14,50 @@ export const headerSearchbox = () => {
 }
 
 export const login = (keyword, password, rememberMe) => {
+    function encryptMyPass(password) {
+        let result = crypto.createHmac("sha256", "jc10").update(password).digest("hex")
+        return result
+    }
     return (dispatch) => {
         axios.get("http://localhost:5555/auth/getlogin", {
             params: {
                 username: keyword,
                 email: keyword,
                 cellphone: keyword,
-                password: password
+                password: encryptMyPass(password)
             }
         })
             .then(res => {
-                let z = ""
-                if (res.data.length === 0) {
-                    alert("User not found")
-                } else if (res.data.length > 0 && rememberMe === true) {
-                    z = res.data[0].userId
+                try {
+                    if (res.data.length === 0) throw "User not found"
+                    let z = res.data[0].userId
                     alert("Login success.");
                     localStorage.setItem(
                         "userData",
                         JSON.stringify(res.data)
                     );
-                    localStorage.setItem(
-                        "rememberMe",
-                        JSON.stringify(res.data[0].username)
-                    );
                     dispatch(
                         {
                             type: "LOGIN_SUCCESS",
                             payload: res.data
                         }
                     )
-                } else if (res.data.length > 0 && rememberMe === false) {
-                    z = res.data[0].userId
-                    alert("Login Success.");
-                    localStorage.setItem(
-                        "userData",
-                        JSON.stringify(res.data)
-                    );
-                    localStorage.removeItem("rememberMe");
-                    dispatch(
-                        {
-                            type: "LOGIN_SUCCESS",
-                            payload: res.data
-                        }
-                    )
-                }
-                axios.post("http://localhost:5555/auth/gettoken", {
-                    username: res.data[0].username
-                })
-                    .then(pos => {
-                        localStorage.setItem("token", pos.data.token);
-                        axios.get("http://localhost:5555/tran/getcart", {
-                            params: {
-                                userId: z
-                            },
-                            headers: {
-                                authorization: pos.data.token
-                            }
-                        })
-                            .then(nex => {
-                                if (nex.data.length > 0) {
-                                    localStorage.setItem(
-                                        "cartLogin",
-                                        JSON.stringify(nex.data)
-                                    )
-                                    let z = 0
-                                    for (let i = 0; i < nex.data.length; i++) {
-                                        z += parseInt(nex.data[i].qty)
-                                    }
-                                    dispatch(
-                                        {
-                                            type: "GET_CART",
-                                            payload: {
-                                                cart: nex.data,
-                                                cartQty: z
-                                            }
-                                        }
-                                    )
-                                } else {
-                                    dispatch(
-                                        {
-                                            type: "EMPTY_CART"
-                                        }
-                                    )
-                                }
-                            })
-                            .catch()
-                        
-                        if (res.data[0].storeapproval === 1) {
-                            axios.get("http://localhost:5555/tran/getuserorder", {
+                    if (rememberMe === true) {
+                        localStorage.setItem(
+                            "rememberMe",
+                            JSON.stringify(res.data[0].username)
+                        );
+                    } else {
+                        localStorage.removeItem("rememberMe");
+                    }
+                    axios.post("http://localhost:5555/auth/gettoken", {
+                        username: res.data[0].username
+                    })
+                        .then(pos => {
+                            localStorage.setItem("token", pos.data.token);
+                            axios.get("http://localhost:5555/tran/getcart", {
                                 params: {
-                                    storename: res.data[0].storename
+                                    userId: z
                                 },
                                 headers: {
                                     authorization: pos.data.token
@@ -112,33 +66,76 @@ export const login = (keyword, password, rememberMe) => {
                                 .then(nex => {
                                     if (nex.data.length > 0) {
                                         localStorage.setItem(
-                                            "userOrder",
+                                            "cartLogin",
                                             JSON.stringify(nex.data)
                                         )
                                         let z = 0
                                         for (let i = 0; i < nex.data.length; i++) {
-                                            z += nex.data[i].qty
+                                            z += parseInt(nex.data[i].qty)
                                         }
                                         dispatch(
                                             {
-                                                type: "GET_USER_ORDER",
+                                                type: "GET_CART",
                                                 payload: {
-                                                    userOrder: nex.data,
-                                                    userOrderQty: z
+                                                    cart: nex.data,
+                                                    cartQty: z
                                                 }
+                                            }
+                                        )
+                                    } else {
+                                        dispatch(
+                                            {
+                                                type: "EMPTY_CART"
                                             }
                                         )
                                     }
                                 })
                                 .catch()
+
+                            if (res.data[0].storeapproval === 1) {
+                                axios.get("http://localhost:5555/tran/getuserorder", {
+                                    params: {
+                                        storename: res.data[0].storename
+                                    },
+                                    headers: {
+                                        authorization: pos.data.token
+                                    }
+                                })
+                                    .then(nex => {
+                                        if (nex.data.length > 0) {
+                                            localStorage.setItem(
+                                                "userOrder",
+                                                JSON.stringify(nex.data)
+                                            )
+                                            let z = 0
+                                            for (let i = 0; i < nex.data.length; i++) {
+                                                z += nex.data[i].qty
+                                            }
+                                            dispatch(
+                                                {
+                                                    type: "GET_USER_ORDER",
+                                                    payload: {
+                                                        userOrder: nex.data,
+                                                        userOrderQty: z
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    })
+                                    .catch()
+                            }
+                        })
+                        .catch()
+                    dispatch(
+                        {
+                            type: "HOME"
                         }
-                    })
-                    .catch()
-                dispatch(
-                    {
-                        type: "HOME"
-                    }
-                )
+                    )
+                } catch (error) {
+                    alert(error)
+                }
+
+
             })
             .catch()
     }
@@ -223,6 +220,11 @@ export const addUser = (val) => {
                             break
                     }
                 } else {
+                    let password = val.retype_password
+                    function encryptMyPass(password) {
+                        let result = crypto.createHmac("sha256", "jc10").update(password).digest("hex")
+                        return result
+                    }
                     axios.post("http://localhost:5555/auth/addUser",
                         {
                             fullname: val.fullname,
@@ -230,7 +232,7 @@ export const addUser = (val) => {
                             email: val.email,
                             gender: val.gender,
                             username: val.username,
-                            password: val.retype_password
+                            password: encryptMyPass(password)
                         }
                     )
                         .then(res => {
@@ -289,12 +291,17 @@ export const sendLinkChangePasswordEmail = (val) => {
 
 
 export const changePassword = (val) => {
+    let password = val.retype_password
+    function encryptMyPass(password) {
+        let result = crypto.createHmac("sha256", "jc10").update(password).digest("hex")
+        return result
+    }
     return (dispatch) => {
         axios.put("http://localhost:5555/auth/changePassword",
             {
                 userId: val.userId,
                 username: val.username,
-                password: val.retype_password
+                password: encryptMyPass(password)
             }
         )
             .then(res => {

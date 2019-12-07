@@ -67,6 +67,35 @@ button#buttonImg:hover {
     }
 }
 
+#divTest {
+    text-align: center;
+    justify-content: center;
+}
+
+#buttonTest {
+    color: black;
+    background-color: yellow;
+}
+
+#tableTest {
+    border: 1px solid black;
+    display: inline-block;
+}
+
+#tdTest0 {
+    color: white;
+    background-color:green;
+}
+
+#tdTest1 {
+    background-color: red;
+}
+
+#tdTest2 {
+    color: white;
+    background-color: blue;
+}
+
 @media (max-width:1300px) {
     #cardCarouselHome {
         width:150px;

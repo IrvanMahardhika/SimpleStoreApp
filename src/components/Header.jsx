@@ -23,7 +23,8 @@ class Header extends Component {
         password: "",
         rememberMe: false,
         username: "",
-        renderpic: "images/userpics/nopic.png"
+        renderpic: "images/userpics/nopic.png",
+        tranId: ""
     }
 
     componentDidMount() {
@@ -202,6 +203,15 @@ class Header extends Component {
                                             <a href="/">Wishlist</a>
                                         </div>
                                     </div>
+                                    {
+                                        this.props.loginRedux[0].role === "admin"
+                                            ?
+                                            <Button className="btn-block mt-3" href={`/Adminmenu/xxx`} >
+                                                Admin Menu
+                                            </Button>
+                                            :
+                                            null
+                                    }
                                     <Button className="btn-block mt-3" onClick={() => { this.logoutClick() }} >
                                         Logout
                                     </Button>
@@ -244,8 +254,8 @@ class Header extends Component {
                             </UncontrolledDropdown>
                             <UncontrolledPopover placement="bottom" trigger="legacy" target="TransactionStatus">
                                 <PopoverBody>
-                                    <Input placeholder="Transaction code" className="my-3" />
-                                    <Button href="/transactionstatus" className="btn-block my-3">
+                                    <Input placeholder="Transaction code" className="my-3" onChange={e => this.setState({ tranId: e.target.value })} />
+                                    <Button disabled={this.state.tranId === ""} href={`/Transactionstatus/${this.state.tranId}`} className="btn-block my-3">
                                         Status
                                     </Button>
                                     <hr></hr>
